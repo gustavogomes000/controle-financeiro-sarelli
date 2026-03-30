@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -65,10 +65,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Pública */}
+            {/* PÃºblica */}
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
 
-            {/* Usuário comum */}
+            {/* UsuÃ¡rio comum */}
             <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/nova-conta" element={<ProtectedRoute><NovaContaPage /></ProtectedRoute>} />
             <Route path="/conta/:id" element={<ProtectedRoute><ContaDetalhePage /></ProtectedRoute>} />
@@ -89,3 +89,4 @@ const App = () => (
 );
 
 export default App;
+

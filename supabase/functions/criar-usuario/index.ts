@@ -54,13 +54,12 @@ Deno.serve(async (req) => {
     }
 
     // Create new auth user with generated email
-    const timestamp = Date.now();
-    const email = `${nome.toLowerCase().replace(/[^a-z0-9]/g, '')}_${timestamp}@campanha.internal`;
+    const email = `${nome.toLowerCase().replace(/[^a-z0-9]/g, '')}@sistema.local`;
     
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password: senha,
-      email_confirm: true,
+      email_confirm: false,
     });
 
     if (authError) {
