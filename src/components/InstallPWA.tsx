@@ -1,73 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Download, X } from 'lucide-react';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { useState, useEffect } from "react";
+import { Download } from "lucide-react";
 
 export default function InstallPWA() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Se já está instalado como PWA standalone, não mostrar
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    if ((navigator as any).standalone === true) return;
-
     const handler = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Mostrar só se ainda não foi dispensado hoje
-      const dismissed = localStorage.getItem('pwa_install_dismissed');
-      if (dismissed !== new Date().toDateString()) {
-        setVisible(true);
-      }
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+      // Update UI notify the user they can install the PWA
+      setIsVisible(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener("beforeinstallprompt", handler);
+
+    // Verifica se já está instalado
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+       setIsVisible(false);
+    }
+
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  const handleInstall = async () => {
+  const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
+    
+    // Show the install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
+    
     if (outcome === 'accepted') {
-      setVisible(false);
-      setDeferredPrompt(null);
+      setIsVisible(false);
     }
+    
+    setDeferredPrompt(null);
   };
 
-  const handleDismiss = () => {
-    localStorage.setItem('pwa_install_dismissed', new Date().toDateString());
-    setVisible(false);
-  };
-
-  if (!visible || !deferredPrompt) return null;
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 max-w-sm mx-auto">
-      <div className="bg-card border border-border rounded-2xl shadow-xl p-4 flex items-center gap-3 animate-fade-in">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-          <Download size={18} className="text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold">Instalar como App</p>
-          <p className="text-[11px] text-muted-foreground">Acesse direto da tela inicial</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleInstall}
-            className="px-3 py-1.5 text-xs font-semibold gradient-primary text-white rounded-lg"
-          >
-            Instalar
-          </button>
-          <button onClick={handleDismiss} className="text-muted-foreground p-1">
-            <X size={16} />
-          </button>
-        </div>
-      </div>
-    </div>
+    <button
+      onClick={handleInstallClick}
+      className="fixed bottom-6 left-6 z-50 flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-pink-500/25 hover:scale-105 transition-all duration-300"
+    >
+      <Download size={18} className="animate-bounce" />
+      <span className="font-semibold text-sm">Instalar App</span>
+    </button>
   );
 }

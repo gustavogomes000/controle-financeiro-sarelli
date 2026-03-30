@@ -46,9 +46,21 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+import VersionMonitor from "./components/VersionMonitor";
+import InstallPWA from "./components/InstallPWA";
+import { useOfflineSync } from "./hooks/useOfflineSync";
+
+function GlobalOfflineSync() {
+  useOfflineSync();
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <GlobalOfflineSync />
+      <InstallPWA />
+      <VersionMonitor />
       <Toaster position="top-center" duration={3000} />
       <BrowserRouter>
         <AuthProvider>
