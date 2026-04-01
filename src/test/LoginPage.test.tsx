@@ -43,7 +43,7 @@ describe('LoginPage', () => {
 
   it('renderiza os campos de usuário e senha', () => {
     renderLogin();
-    expect(screen.getByPlaceholderText(/seu nome de acesso/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ex: administrador/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
   });
 
