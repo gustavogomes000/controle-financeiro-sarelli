@@ -213,7 +213,7 @@ export default function ContaDetalhePage() {
   const getLogLabel = (log: LogEntry) => {
     if (log.acao === 'CRIADA') return '📝 Conta registrada';
     if (log.acao === 'EDITADA') return '✏️ Dados editados';
-    if (log.status_novo === 'Aprovada') return '✅ Aprovação concedida';
+    if (log.status_novo === 'Aprovada') return '✅ Conta aprovada';
     if (log.status_novo === 'Paga') return '💰 Pagamento registrado';
     if (log.status_novo === 'Cancelada') return '❌ Conta cancelada';
     if (log.status_novo === 'Lancada') return '↩️ Devolvida para revisão';
