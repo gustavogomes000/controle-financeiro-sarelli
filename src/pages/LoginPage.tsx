@@ -1,116 +1,30 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import Hyperspeed from '@/components/Hyperspeed';
 import { toast } from 'sonner';
 import fotoFernanda from '@/assets/foto-fernanda.png';
 import logoSarelli from '@/assets/Logo_Sarelli.png';
 
-/* ── Geometric Network Background ── */
-interface Node { x: number; y: number; vx: number; vy: number }
-
-function NetworkBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const nodesRef = useRef<Node[]>([]);
-  const rafRef = useRef(0);
-
-  const init = useCallback((w: number, h: number) => {
-    const count = Math.floor((w * h) / 12000);
-    nodesRef.current = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-    }));
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init(canvas.width, canvas.height);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const draw = () => {
-      const { width: w, height: h } = canvas;
-      ctx.clearRect(0, 0, w, h);
-      const nodes = nodesRef.current;
-      const maxDist = 140;
-
-      for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < 0 || n.x > w) n.vx *= -1;
-        if (n.y < 0 || n.y > h) n.vy *= -1;
-      }
-
-      ctx.strokeStyle = 'rgba(232,160,180,0.15)';
-      ctx.lineWidth = 0.8;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < maxDist) {
-            ctx.globalAlpha = 1 - d / maxDist;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(232,160,180,0.5)';
-      for (const n of nodes) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      rafRef.current = requestAnimationFrame(draw);
-    };
-    rafRef.current = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', resize);
-    };
-  }, [init]);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
-}
-
-/* ── Light Streaks ── */
-function LightStreaks() {
-  return (
-    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
-      {[0, 1, 2, 3, 4].map(i => (
-        <div
-          key={i}
-          className="absolute origin-center"
-          style={{
-            right: `${-5 + i * 6}%`,
-            top: `${20 + i * 12}%`,
-            width: '500px',
-            height: '2px',
-            background: i % 2 === 0
-              ? 'linear-gradient(90deg, transparent, #e91e8c88, #e91e8c44, transparent)'
-              : 'linear-gradient(90deg, transparent, #d4a85388, #d4a85344, transparent)',
-            transform: 'rotate(35deg)',
-            filter: 'blur(3px)',
-            animation: `streakFlow ${3 + i * 0.7}s ease-in-out infinite alternate`,
-            opacity: 0.6 + i * 0.08,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+const hyperspeedPreset = {
+  onSpeedUp: () => {}, onSlowDown: () => {},
+  distortion: 'turbulentDistortion',
+  length: 800, roadWidth: 18, islandWidth: 4, lanesPerRoad: 3,
+  fov: 100, fovSpeedUp: 140, speedUp: 2, carLightsFade: 0.4,
+  totalSideLightSticks: 40, lightPairsPerRoadWay: 80,
+  shoulderLinesWidthPercentage: 0.05, brokenLinesWidthPercentage: 0.1, brokenLinesLengthPercentage: 0.5,
+  lightStickWidth: [0.12, 0.5], lightStickHeight: [1.3, 1.7],
+  movingAwaySpeed: [60, 100], movingCloserSpeed: [-120, -180],
+  carLightsLength: [800 * 0.04, 800 * 0.14], carLightsRadius: [0.05, 0.14],
+  carWidthPercentage: [0.3, 0.5], carShiftX: [-0.8, 0.8], carFloorSeparation: [0, 5],
+  colors: {
+    roadColor: 0x1a0a12, islandColor: 0x1a0812, background: 0x140a10,
+    shoulderLines: 0x2a1020, brokenLines: 0x2a1020,
+    leftCars: [0xe91e8c, 0xf9a8d4, 0xd4a853, 0xfda4af],
+    rightCars: [0xf43f5e, 0xd4a853, 0xc026d3, 0xe879f9],
+    sticks: 0xf472b6,
+  },
+};
 
 /* ── Main ── */
 export default function LoginPage() {
@@ -121,22 +35,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(() => !!localStorage.getItem('saved_user'));
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes streakFlow {
-        0% { opacity: 0.3; transform: rotate(35deg) translateX(-40px); }
-        100% { opacity: 0.8; transform: rotate(35deg) translateX(40px); }
-      }
-      @keyframes orbFloat {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(30px, -20px) scale(1.08); }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
+  const preset = useMemo(() => hyperspeedPreset, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,47 +61,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
-      <NetworkBackground />
-      <LightStreaks />
-
-      {/* Floating orbs */}
-      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.18), transparent 70%)', animation: 'orbFloat 8s ease-in-out infinite' }} />
-      <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(212,168,83,0.15), transparent 70%)', animation: 'orbFloat 10s ease-in-out infinite reverse' }} />
-      <div className="absolute -bottom-20 left-1/4 w-56 h-56 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.12), transparent 70%)', animation: 'orbFloat 12s ease-in-out infinite 2s' }} />
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: '#140a10' }}>
+      <Hyperspeed effectOptions={preset} />
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(20,10,16,0.6) 100%)' }} />
+      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl bg-pink-500/25 pointer-events-none z-[1]" style={{ animation: 'brand-float-slow 8s ease-in-out infinite' }} />
+      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(212,168,83,0.2)', animation: 'brand-float-slow 10s ease-in-out infinite reverse' }} />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
         <div className="text-center space-y-2">
           {/* Photo with pink border */}
-          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853] shadow-lg">
-            <div className="w-full h-full rounded-full overflow-hidden bg-white">
+          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853]" style={{ boxShadow: '0 0 40px rgba(233,30,140,0.4)' }}>
+            <div className="w-full h-full rounded-full overflow-hidden bg-black">
               <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
             </div>
           </div>
+          <div className="absolute bottom-1 right-1/2 translate-x-[35px] w-4 h-4 rounded-full bg-emerald-500 border-2 border-black" style={{ animation: 'brand-pulse-glow 2s ease-in-out infinite' }} />
 
           {/* Logo image */}
-          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2" />
+          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2 brightness-[2] contrast-[1.1]" />
 
           {/* System name */}
           <div className="mt-1">
             <p className="text-lg uppercase tracking-[0.3em] font-bold" style={{ color: '#d4a853' }}>Contas a Pagar</p>
           </div>
 
-          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Acesso exclusivo da equipe</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Acesso exclusivo da equipe</p>
           <p className="text-[10px] uppercase tracking-[0.15em] font-medium" style={{ color: '#d4a853' }}>Painel de Pagamentos Financeiro</p>
         </div>
 
         {/* Login Card */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl p-6 border border-white/60"
-          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+          className="space-y-4 rounded-2xl p-6 border border-white/[0.08]"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px hsl(340 82% 55% / 0.15)' }}
         >
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Usuário</label>
+            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Usuário</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <input
@@ -212,16 +109,16 @@ export default function LoginPage() {
                 onChange={e => setNome(e.target.value)}
                 autoComplete="username"
                 required
-                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-4 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
+                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-4 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
                 style={{ fontSize: '16px' }}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Senha</label>
+            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Senha</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <input
@@ -231,10 +128,10 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-10 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
+                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-10 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
                 style={{ fontSize: '16px' }}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors" tabIndex={-1}>
                 {showPassword
                   ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
                   : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -244,8 +141,8 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#e91e8c] cursor-pointer" />
-            <label htmlFor="remember" className="text-xs text-gray-500 cursor-pointer select-none">Lembrar meus dados</label>
+            <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/10 accent-pink-500 cursor-pointer" />
+            <label htmlFor="remember" className="text-xs text-white/50 cursor-pointer select-none">Lembrar meus dados</label>
           </div>
 
           <button
@@ -262,8 +159,8 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center space-y-1 pt-2">
-          <p className="text-[11px] text-gray-400">Pré-candidata a Deputada Estadual — GO 2026</p>
-          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium hover:underline" style={{ color: '#e91e8c' }}>
+          <p className="text-[11px] text-white/25">Pré-candidata a Deputada Estadual — GO 2026</p>
+          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium text-pink-400 hover:underline">
             drafernandacarelli.com.br
           </a>
         </div>
