@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusCircle, BarChart3, User, TrendingUp, Users } from 'lucide-react';
+import { Home, PlusCircle, BarChart3, User, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import InstallPWA from '@/components/InstallPWA';
@@ -9,9 +9,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const [swUpdate, setSwUpdate] = useState(false);
 
-  // Detecta atualização do service worker
+  // Auto-reload silencioso quando há nova versão do SW
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
     navigator.serviceWorker.ready.then(reg => {
@@ -20,13 +19,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         if (!newWorker) return;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            setSwUpdate(true);
+            window.location.reload();
           }
         });
       });
     });
   }, []);
-
   const navItems = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/nova-conta', icon: PlusCircle, label: 'Nova' },
@@ -42,21 +40,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Barra superior gradiente */}
       <div className="bg-gradient-to-r from-primary via-rose-400 to-pink-300 h-1 sticky top-0 z-50" />
-
-      {/* Aviso de atualização do app */}
-      {swUpdate && (
-        <div className="sticky top-1 z-50 mx-4 mt-1">
-          <div className="bg-primary text-primary-foreground rounded-xl px-4 py-2.5 flex items-center justify-between shadow-lg text-sm font-medium">
-            <span>Nova versão disponível!</span>
-            <button
-              onClick={() => window.location.reload()}
-              className="ml-3 underline font-bold text-xs"
-            >
-              Atualizar
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <header className="sticky top-1 z-40 bg-card border-b border-border px-4 py-3 shadow-sm">
