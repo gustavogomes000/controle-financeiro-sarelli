@@ -387,34 +387,38 @@ export default function ContaDetalhePage() {
 
             {/* Barra de progresso visual */}
             {conta.status !== 'Cancelada' ? (
-              <div className="section-card !p-4 !space-y-0">
-                <div className="flex items-center justify-between">
+              <div className="section-card !p-5 !space-y-0">
+                <div className="flex items-center w-full">
                   {STEPS.map((step: any, idx: number) => {
                     const done = idx <= currentStepIdx;
                     const isCurrent = idx === currentStepIdx;
                     return (
-                      <div key={step.key} className="flex items-center">
-                        <div className="flex flex-col items-center">
+                      <div key={step.key} className="flex items-center flex-1 last:flex-none">
+                        <div className="flex flex-col items-center min-w-[56px]">
                           <div className={cn(
-                            'w-10 h-10 rounded-full flex items-center justify-center text-base border-2 transition-all',
+                            'w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-sm transition-all duration-300',
                             done
-                              ? 'bg-primary/10 border-primary text-primary'
-                              : 'bg-muted border-border text-muted-foreground'
+                              ? 'bg-primary/15 ring-2 ring-primary ring-offset-2 ring-offset-background'
+                              : 'bg-muted/60 ring-1 ring-border'
                           )}>
                             {step.emoji}
                           </div>
                           <span className={cn(
-                            'text-[10px] mt-1.5 font-medium',
-                            isCurrent ? 'text-primary font-bold' : done ? 'text-foreground' : 'text-muted-foreground'
+                            'text-[11px] mt-2 font-semibold tracking-tight',
+                            isCurrent ? 'text-primary' : done ? 'text-foreground' : 'text-muted-foreground'
                           )}>
                             {step.label}
                           </span>
                         </div>
                         {idx < STEPS.length - 1 && (
-                          <div className={cn(
-                            'w-8 h-0.5 mx-1 rounded-full -mt-4',
-                            idx < currentStepIdx ? 'bg-primary' : 'bg-border'
-                          )} />
+                          <div className="flex-1 mx-2 -mt-5">
+                            <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
+                              <div className={cn(
+                                'h-full rounded-full transition-all duration-500',
+                                idx < currentStepIdx ? 'w-full bg-primary' : 'w-0'
+                              )} />
+                            </div>
+                          </div>
                         )}
                       </div>
                     );
