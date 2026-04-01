@@ -435,7 +435,7 @@ export default function ContaDetalhePage() {
                 <InfoRow label="Vencimento" value={fmtData(conta.data_vencimento)} />
                 {conta.data_pagamento && <InfoRow label="Pago em" value={fmtData(conta.data_pagamento)} />}
                 {conta.forma_pagamento && <InfoRow label="Forma de pagamento" value={conta.forma_pagamento} />}
-                {conta.chave_pix && <InfoRow label={extraPagLabel[conta.forma_pagamento] ?? 'Referência'} value={conta.chave_pix} />}
+                {conta.chave_pix && <InfoRow label={extraPagLabel[conta.forma_pagamento] ?? 'Dados do pagamento'} value={conta.chave_pix} />}
                 <InfoRow label="Registrado por" value={getNome(conta.criado_por) ?? '—'} />
                 {conta.aprovado_por && <InfoRow label="Aprovado por" value={getNome(conta.aprovado_por) ?? '—'} />}
                 {conta.pago_por && <InfoRow label="Pago por" value={getNome(conta.pago_por) ?? '—'} />}
