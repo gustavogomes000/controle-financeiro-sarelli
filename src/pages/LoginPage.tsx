@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import fotoFernanda from '@/assets/foto-fernanda.png';
 import logoSarelli from '@/assets/Logo_Sarelli.png';
 
 /* ── Geometric Network Background ── */
@@ -47,7 +48,6 @@ function NetworkBackground() {
         if (n.y < 0 || n.y > h) n.vy *= -1;
       }
 
-      // lines
       ctx.strokeStyle = 'rgba(232,160,180,0.15)';
       ctx.lineWidth = 0.8;
       for (let i = 0; i < nodes.length; i++) {
@@ -65,7 +65,6 @@ function NetworkBackground() {
         }
       }
 
-      // dots
       ctx.globalAlpha = 1;
       ctx.fillStyle = 'rgba(232,160,180,0.5)';
       for (const n of nodes) {
@@ -86,7 +85,7 @@ function NetworkBackground() {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
 }
 
-/* ── Light Streaks (right side) ── */
+/* ── Light Streaks ── */
 function LightStreaks() {
   return (
     <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
@@ -113,7 +112,7 @@ function LightStreaks() {
   );
 }
 
-/* ── Main Login Page ── */
+/* ── Main ── */
 export default function LoginPage() {
   const [nome, setNome] = useState(() => localStorage.getItem('saved_user') || '');
   const [password, setPassword] = useState(() => localStorage.getItem('saved_pass') || '');
@@ -163,26 +162,24 @@ export default function LoginPage() {
       <NetworkBackground />
       <LightStreaks />
 
-      {/* Content */}
       <div className="w-full max-w-sm space-y-5 relative z-10">
-
         {/* Logo Section */}
         <div className="text-center space-y-2">
-          {/* Profile photo circle */}
+          {/* Photo with pink border */}
           <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853] shadow-lg">
             <div className="w-full h-full rounded-full overflow-hidden bg-white">
-              <img src={logoSarelli} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
+              <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
             </div>
           </div>
 
-          <div className="mt-3">
-            <p className="text-xs uppercase tracking-[0.25em] text-gray-500 font-medium">Doutora Fernanda</p>
-            <h1 className="text-[44px] font-extrabold text-gray-800 leading-none -mt-1 tracking-tight">SARELLI</h1>
-            {/* pink underline accent */}
-            <div className="mx-auto mt-1 w-24 h-[3px] rounded-full" style={{ background: 'linear-gradient(90deg, #e91e8c, #f472b6)' }} />
+          {/* Logo image */}
+          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-16 object-contain mt-2" />
+
+          {/* System name */}
+          <div className="mt-1">
+            <p className="text-lg uppercase tracking-[0.3em] font-bold" style={{ color: '#d4a853' }}>Contas a Pagar</p>
           </div>
 
-          <p className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#d4a853' }}>Financeiro</p>
           <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Acesso exclusivo da equipe</p>
           <p className="text-[10px] uppercase tracking-[0.15em] font-medium" style={{ color: '#d4a853' }}>Painel de Pagamentos Financeiro</p>
         </div>
@@ -193,7 +190,6 @@ export default function LoginPage() {
           className="space-y-4 rounded-2xl p-6 border border-white/60"
           style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
         >
-          {/* User field */}
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Usuário</label>
             <div className="relative">
@@ -213,7 +209,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Password field */}
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Senha</label>
             <div className="relative">
@@ -239,19 +234,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Remember */}
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="remember"
-              checked={remember}
-              onChange={e => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 accent-[#e91e8c] cursor-pointer"
-            />
+            <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#e91e8c] cursor-pointer" />
             <label htmlFor="remember" className="text-xs text-gray-500 cursor-pointer select-none">Lembrar meus dados</label>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -265,7 +252,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Footer */}
         <div className="text-center space-y-1 pt-2">
           <p className="text-[11px] text-gray-400">Pré-candidata a Deputada Estadual — GO 2026</p>
           <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium hover:underline" style={{ color: '#e91e8c' }}>
