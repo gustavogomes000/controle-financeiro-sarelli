@@ -61,14 +61,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
-      <NetworkBackground />
-      <LightStreaks />
-
-      {/* Floating orbs */}
-      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.18), transparent 70%)', animation: 'orbFloat 8s ease-in-out infinite' }} />
-      <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(212,168,83,0.15), transparent 70%)', animation: 'orbFloat 10s ease-in-out infinite reverse' }} />
-      <div className="absolute -bottom-20 left-1/4 w-56 h-56 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.12), transparent 70%)', animation: 'orbFloat 12s ease-in-out infinite 2s' }} />
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: '#140a10' }}>
+      <Hyperspeed effectOptions={preset} />
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(20,10,16,0.6) 100%)' }} />
+      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl bg-pink-500/25 pointer-events-none z-[1]" style={{ animation: 'brand-float-slow 8s ease-in-out infinite' }} />
+      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(212,168,83,0.2)', animation: 'brand-float-slow 10s ease-in-out infinite reverse' }} />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
