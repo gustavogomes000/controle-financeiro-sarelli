@@ -26,113 +26,6 @@ const hyperspeedPreset = {
   },
 };
 
-/* ── Geometric Network Background ── */
-interface Node { x: number; y: number; vx: number; vy: number }
-
-function NetworkBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const nodesRef = useRef<Node[]>([]);
-  const rafRef = useRef(0);
-
-  const init = useCallback((w: number, h: number) => {
-    const count = Math.floor((w * h) / 12000);
-    nodesRef.current = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-    }));
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init(canvas.width, canvas.height);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const draw = () => {
-      const { width: w, height: h } = canvas;
-      ctx.clearRect(0, 0, w, h);
-      const nodes = nodesRef.current;
-      const maxDist = 140;
-
-      for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < 0 || n.x > w) n.vx *= -1;
-        if (n.y < 0 || n.y > h) n.vy *= -1;
-      }
-
-      ctx.strokeStyle = 'rgba(232,160,180,0.15)';
-      ctx.lineWidth = 0.8;
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < maxDist) {
-            ctx.globalAlpha = 1 - d / maxDist;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(232,160,180,0.5)';
-      for (const n of nodes) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      rafRef.current = requestAnimationFrame(draw);
-    };
-    rafRef.current = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', resize);
-    };
-  }, [init]);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
-}
-
-/* ── Light Streaks ── */
-function LightStreaks() {
-  return (
-    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
-      {[0, 1, 2, 3, 4].map(i => (
-        <div
-          key={i}
-          className="absolute origin-center"
-          style={{
-            right: `${-5 + i * 6}%`,
-            top: `${20 + i * 12}%`,
-            width: '500px',
-            height: '2px',
-            background: i % 2 === 0
-              ? 'linear-gradient(90deg, transparent, #e91e8c88, #e91e8c44, transparent)'
-              : 'linear-gradient(90deg, transparent, #d4a85388, #d4a85344, transparent)',
-            transform: 'rotate(35deg)',
-            filter: 'blur(3px)',
-            animation: `streakFlow ${3 + i * 0.7}s ease-in-out infinite alternate`,
-            opacity: 0.6 + i * 0.08,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 /* ── Main ── */
 export default function LoginPage() {
   const [nome, setNome] = useState(() => localStorage.getItem('saved_user') || '');
@@ -142,22 +35,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(() => !!localStorage.getItem('saved_user'));
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes streakFlow {
-        0% { opacity: 0.3; transform: rotate(35deg) translateX(-40px); }
-        100% { opacity: 0.8; transform: rotate(35deg) translateX(40px); }
-      }
-      @keyframes orbFloat {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(30px, -20px) scale(1.08); }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
+  const preset = useMemo(() => hyperspeedPreset, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
