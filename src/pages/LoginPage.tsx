@@ -149,7 +149,7 @@ export default function LoginPage() {
             className="text-sm sm:text-[15px] uppercase tracking-[0.3em] font-semibold mt-1 mb-5"
             style={{ color: '#c8aa64' }}
           >
-            Painel de Pagamentos
+            Contas a Pagar
           </p>
         </div>
 
