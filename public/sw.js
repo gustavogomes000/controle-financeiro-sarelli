@@ -34,6 +34,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   if (url.hostname.includes('supabase.co')) return;
   if (url.protocol === 'chrome-extension:') return;
+  if (url.pathname.startsWith('/~oauth')) return;
 
   // Navegação — network first com fallback
   if (request.mode === 'navigate') {
