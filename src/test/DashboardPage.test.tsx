@@ -94,7 +94,7 @@ describe('DashboardPage', () => {
     mockUseAuth.mockReturnValue(adminUser);
     renderDashboard();
     await waitFor(() =>
-      expect(screen.getByText(/Nenhum registro/i)).toBeInTheDocument(),
+      expect(screen.getByText(/Tudo em dia/i)).toBeInTheDocument(),
     );
   });
 });
