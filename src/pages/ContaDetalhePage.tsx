@@ -477,31 +477,7 @@ export default function ContaDetalhePage() {
         )}
 
         {/* ========== AÇÕES ADMIN ========== */}
-        {isAdmin && conta.status === 'Lancada' && !editMode && (
-          <div className="section-card !space-y-3 border-primary/20">
-            <p className="section-title">👆 Próximo passo</p>
-            <p className="text-[12px] text-muted-foreground">
-              Revise os dados acima e escolha uma ação:
-            </p>
-            <Button
-              onClick={() => changeStatus('Aprovada')}
-              disabled={actionLoading}
-              className="w-full h-12 gradient-primary text-primary-foreground font-semibold rounded-xl"
-            >
-              <Check size={16} className="mr-2" /> Aprovar esta conta
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => changeStatus('Cancelada')}
-              disabled={actionLoading}
-              className="w-full h-11 text-destructive border-destructive/30 rounded-xl text-sm"
-            >
-              <X size={14} className="mr-2" /> Recusar
-            </Button>
-          </div>
-        )}
-
-        {isAdmin && conta.status === 'Aprovada' && (
+        {isAdmin && (conta.status === 'Lancada' || conta.status === 'Aprovada') && !editMode && (
           <div className="section-card !space-y-4 border-primary/20">
             <p className="section-title">💳 Registrar pagamento</p>
             <p className="text-[12px] text-muted-foreground">
@@ -520,7 +496,6 @@ export default function ContaDetalhePage() {
               </Select>
             </div>
 
-            {/* [FEATURE 5] Campo extra dinâmico baseado na forma de pagamento */}
             {formaPagamento && extraPagLabel[formaPagamento] && (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -553,7 +528,6 @@ export default function ContaDetalhePage() {
               />
             </div>
 
-            {/* [FEATURE 4] Aviso de comprovante ausente */}
             {avisoSemComprovante && !conta.comprovante_url && (
               <div className="px-4 py-3 bg-yellow-50 border border-yellow-300 rounded-xl space-y-2">
                 <p className="text-sm font-semibold text-yellow-800">⚠️ Nenhum comprovante anexado</p>
