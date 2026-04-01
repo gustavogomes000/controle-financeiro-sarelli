@@ -8,6 +8,12 @@ vi.mock('@/components/AppLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() }, Toaster: () => null }));
+vi.mock('@/components/FileUpload', () => ({
+  default: () => <div data-testid="file-upload" />,
+}));
+vi.mock('@/components/UserSelect', () => ({
+  default: () => <div data-testid="user-select" />,
+}));
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -55,6 +61,8 @@ const buildConta = (status: string) => ({
   motivo: 'Necessário para campanha no bairro X', observacoes: null, comprovante_url: null,
   criado_em: '2026-03-10T08:00:00Z', criado_por: 'usr-1', aprovado_por: null,
   pago_por: null, data_pagamento: null, forma_pagamento: null, atualizado_em: null,
+  chave_pix: null, recorrente: false, dia_vencimento_recorrente: null,
+  fornecedor_id: null, fornecedor_nome_livre: null, subcategoria: null,
 });
 
 const setupFrom = (status: string) => {
@@ -74,8 +82,12 @@ const setupFrom = (status: string) => {
     order: vi.fn(() => Promise.resolve({ data: mockLogs, error: null })),
     insert: vi.fn(() => Promise.resolve({ data: null, error: null })),
   };
+  const usuariosChain: any = {
+    select: vi.fn(() => Promise.resolve({ data: [{ id: 'usr-1', nome: 'João' }, { id: 'usr-admin', nome: 'Admin' }], error: null })),
+  };
   mockFrom.mockImplementation((table: string) => {
     if (table === 'contas_pagar') return contaChain;
+    if (table === 'usuarios') return usuariosChain;
     return logChain;
   });
   return { contaChain, logChain };
@@ -113,30 +125,12 @@ describe('ContaDetalhePage', () => {
     );
   });
 
-  it('badge mostra label humano "Aguardando revisão" para status Lancada', async () => {
+  it('renderiza step "Registrada" na barra de progresso', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Lancada');
     renderPage();
     await waitFor(() =>
-      expect(screen.getAllByText('Aguardando revisão').length).toBeGreaterThan(0),
-    );
-  });
-
-  it('badge mostra "A pagar" para status Aprovada', async () => {
-    mockUseAuth.mockReturnValue(adminAuth);
-    setupFrom('Aprovada');
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getAllByText('A pagar').length).toBeGreaterThan(0),
-    );
-  });
-
-  it('badge mostra "Pago" para status Paga', async () => {
-    mockUseAuth.mockReturnValue(adminAuth);
-    setupFrom('Paga');
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getAllByText('Pago').length).toBeGreaterThan(0),
+      expect(screen.getByText('Registrada')).toBeInTheDocument(),
     );
   });
 
@@ -149,39 +143,30 @@ describe('ContaDetalhePage', () => {
     );
   });
 
-  it('admin com status Lancada vê botão "Aprovar conta"', async () => {
+  it('admin com status Lancada vê seção "Registrar pagamento"', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Lancada');
     renderPage();
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /aprovar conta/i })).toBeInTheDocument(),
+      expect(screen.getByText(/Registrar pagamento/)).toBeInTheDocument(),
     );
   });
 
-  it('admin com status Lancada vê botão "Recusar / Cancelar"', async () => {
+  it('admin com status Lancada vê botão "Confirmar pagamento"', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Lancada');
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /recusar.*cancelar/i })).toBeInTheDocument(),
-    );
-  });
-
-  it('admin com status Aprovada vê botão "Confirmar pagamento"', async () => {
-    mockUseAuth.mockReturnValue(adminAuth);
-    setupFrom('Aprovada');
     renderPage();
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /confirmar pagamento/i })).toBeInTheDocument(),
     );
   });
 
-  it('admin com status Aprovada vê selector "Como foi / será pago?"', async () => {
+  it('admin com status Lancada vê botão "Cancelar conta"', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
-    setupFrom('Aprovada');
+    setupFrom('Lancada');
     renderPage();
     await waitFor(() =>
-      expect(screen.getByText(/como foi.*será pago/i)).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: /cancelar conta/i })).toBeInTheDocument(),
     );
   });
 
@@ -189,8 +174,7 @@ describe('ContaDetalhePage', () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Paga');
     renderPage();
-    await waitFor(() => expect(screen.getAllByText('Pago').length).toBeGreaterThan(0));
-    expect(screen.queryByRole('button', { name: /aprovar/i })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Paga')).toBeInTheDocument());
     expect(screen.queryByRole('button', { name: /confirmar pagamento/i })).not.toBeInTheDocument();
   });
 
@@ -198,28 +182,16 @@ describe('ContaDetalhePage', () => {
     mockUseAuth.mockReturnValue(regularAuth);
     setupFrom('Lancada');
     renderPage();
-    await waitFor(() => expect(screen.getAllByText('Aguardando revisão').length).toBeGreaterThan(0));
-    expect(screen.queryByRole('button', { name: /aprovar/i })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Registrada')).toBeInTheDocument());
+    expect(screen.queryByText(/Registrar pagamento/)).not.toBeInTheDocument();
   });
 
-  it('clicar em "Aprovar conta" chama update no supabase', async () => {
-    mockUseAuth.mockReturnValue(adminAuth);
-    const { contaChain } = setupFrom('Lancada');
-    renderPage();
-    await waitFor(() => screen.getByRole('button', { name: /aprovar conta/i }));
-    fireEvent.click(screen.getByRole('button', { name: /aprovar conta/i }));
-    await waitFor(() => expect(contaChain.update).toHaveBeenCalled());
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('A pagar')),
-    );
-  });
-
-  it('renderiza o histórico de logs com label humanizado', async () => {
+  it('renderiza o histórico de logs', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Lancada');
     renderPage();
     await waitFor(() =>
-      expect(screen.getByText('Lançamento registrado')).toBeInTheDocument(),
+      expect(screen.getByText(/Conta registrada/)).toBeInTheDocument(),
     );
   });
 
@@ -227,8 +199,8 @@ describe('ContaDetalhePage', () => {
     mockUseAuth.mockReturnValue(adminAuth);
     setupFrom('Lancada');
     renderPage();
-    await waitFor(() => expect(screen.getAllByText('Aguardando revisão').length).toBeGreaterThan(0));
-    fireEvent.click(screen.getAllByRole('button')[0]);
+    await waitFor(() => expect(screen.getByText('Registrada')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Voltar'));
     expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 });
