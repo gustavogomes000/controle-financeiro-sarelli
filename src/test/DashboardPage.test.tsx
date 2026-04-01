@@ -67,8 +67,11 @@ describe('DashboardPage', () => {
   it('renderiza saudação com nome do usuário', async () => {
     mockUseAuth.mockReturnValue(adminUser);
     renderDashboard();
-    await waitFor(() => expect(screen.getByText(/Olá,/)).toBeInTheDocument());
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    await waitFor(() => {
+      const heading = screen.getByText(/Olá,/);
+      expect(heading).toBeInTheDocument();
+      expect(heading.textContent).toContain('Admin');
+    });
   });
 
   it('renderiza as 3 abas de resumo (A pagar, Vencidas, Pago)', async () => {
@@ -91,7 +94,7 @@ describe('DashboardPage', () => {
     mockUseAuth.mockReturnValue(adminUser);
     renderDashboard();
     await waitFor(() =>
-      expect(screen.getByText(/Nenhum registro/i)).toBeInTheDocument(),
+      expect(screen.getByText(/Tudo em dia/i)).toBeInTheDocument(),
     );
   });
 });
