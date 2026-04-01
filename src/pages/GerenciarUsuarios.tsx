@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Plus, User, Shield, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
+import { Plus, User, Shield, Eye, EyeOff, ArrowLeft, Loader2, Pencil, Trash2, X, KeyRound } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -25,12 +25,25 @@ export default function GerenciarUsuarios() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
-  // Form state
+  // Create form
   const [nome, setNome] = useState('');
   const [senha, setSenha] = useState('');
   const [tipo, setTipo] = useState<'usuario' | 'admin'>('usuario');
   const [showSenha, setShowSenha] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Edit state
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [editNome, setEditNome] = useState('');
+  const [editTipo, setEditTipo] = useState<'usuario' | 'admin'>('usuario');
+  const [editSenha, setEditSenha] = useState('');
+  const [showEditSenha, setShowEditSenha] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [showResetSenha, setShowResetSenha] = useState(false);
+
+  // Delete state
+  const [deletingUser, setDeletingUser] = useState<Usuario | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -81,6 +94,83 @@ export default function GerenciarUsuarios() {
     }
   };
 
+  const openEdit = (u: Usuario) => {
+    setEditingUser(u);
+    setEditNome(u.nome);
+    setEditTipo(u.tipo as 'usuario' | 'admin');
+    setEditSenha('');
+    setShowResetSenha(false);
+    setShowEditSenha(false);
+  };
+
+  const closeEdit = () => {
+    setEditingUser(null);
+    setEditNome('');
+    setEditTipo('usuario');
+    setEditSenha('');
+    setShowResetSenha(false);
+  };
+
+  const handleEditar = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    if (!editNome.trim()) {
+      toast.error('Nome é obrigatório');
+      return;
+    }
+    if (showResetSenha && editSenha && editSenha.length < 6) {
+      toast.error('Senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
+    setEditSaving(true);
+    try {
+      const res = await supabase.functions.invoke('gerenciar-usuario', {
+        body: {
+          action: 'edit',
+          usuario_id: editingUser.id,
+          nome: editNome.trim(),
+          tipo: editTipo,
+          ...(showResetSenha && editSenha ? { nova_senha: editSenha } : {}),
+        },
+      });
+
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Erro ao editar');
+      }
+
+      toast.success('✓ Usuário atualizado!');
+      closeEdit();
+      fetchUsuarios();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao editar usuário');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleDeletar = async () => {
+    if (!deletingUser) return;
+    setDeleting(true);
+    try {
+      const res = await supabase.functions.invoke('gerenciar-usuario', {
+        body: { action: 'delete', usuario_id: deletingUser.id },
+      });
+
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Erro ao remover');
+      }
+
+      toast.success(`Usuário "${deletingUser.nome}" removido`);
+      setDeletingUser(null);
+      fetchUsuarios();
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao remover usuário');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const fmtData = (d: string) => {
     try { return format(parseISO(d), "dd/MM/yyyy", { locale: ptBR }); }
     catch { return d; }
@@ -116,7 +206,7 @@ export default function GerenciarUsuarios() {
         </div>
 
         {/* Botão criar */}
-        {!showForm && (
+        {!showForm && !editingUser && (
           <button
             onClick={() => setShowForm(true)}
             className="btn-primary flex items-center justify-center gap-2"
@@ -214,6 +304,140 @@ export default function GerenciarUsuarios() {
           </form>
         )}
 
+        {/* Formulário de edição */}
+        {editingUser && (
+          <form onSubmit={handleEditar} className="section-card space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="section-title">Editar Usuário</p>
+              <button type="button" onClick={closeEdit} className="text-muted-foreground">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="label-micro">Nome completo *</label>
+              <Input
+                placeholder="Nome do usuário"
+                value={editNome}
+                onChange={e => setEditNome(e.target.value)}
+                className="form-input"
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="label-micro">Tipo de acesso *</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditTipo('usuario')}
+                  className={cn(
+                    'h-12 rounded-xl border-2 text-sm font-semibold transition-all',
+                    editTipo === 'usuario'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground'
+                  )}
+                >
+                  👤 Usuário
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditTipo('admin')}
+                  className={cn(
+                    'h-12 rounded-xl border-2 text-sm font-semibold transition-all',
+                    editTipo === 'admin'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground'
+                  )}
+                >
+                  🛡️ Admin
+                </button>
+              </div>
+            </div>
+
+            {/* Reset senha toggle */}
+            {!showResetSenha ? (
+              <button
+                type="button"
+                onClick={() => setShowResetSenha(true)}
+                className="flex items-center gap-2 text-sm text-primary font-medium"
+              >
+                <KeyRound size={14} /> Resetar senha
+              </button>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="label-micro">Nova senha</label>
+                <div className="relative">
+                  <Input
+                    type={showEditSenha ? 'text' : 'password'}
+                    placeholder="Mínimo 6 caracteres"
+                    value={editSenha}
+                    onChange={e => setEditSenha(e.target.value)}
+                    className="form-input pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditSenha(!showEditSenha)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    tabIndex={-1}
+                  >
+                    {showEditSenha ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowResetSenha(false); setEditSenha(''); }}
+                  className="text-xs text-muted-foreground"
+                >
+                  Cancelar reset de senha
+                </button>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <button type="submit" disabled={editSaving} className="btn-primary flex items-center justify-center gap-2 flex-1">
+                {editSaving ? <><Loader2 size={16} className="animate-spin" /> Salvando...</> : '✓ Salvar alterações'}
+              </button>
+              <button
+                type="button"
+                onClick={closeEdit}
+                className="h-12 px-4 rounded-xl border border-border text-sm text-muted-foreground"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Modal confirmação de exclusão */}
+        {deletingUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-card rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-xl">
+              <p className="text-lg font-bold text-foreground">Remover usuário?</p>
+              <p className="text-sm text-muted-foreground">
+                Tem certeza que deseja remover <strong>{deletingUser.nome}</strong>? 
+                Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeletar}
+                  disabled={deleting}
+                  className="flex-1 h-12 rounded-xl bg-destructive text-destructive-foreground font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  {deleting ? <><Loader2 size={16} className="animate-spin" /> Removendo...</> : '🗑️ Sim, remover'}
+                </button>
+                <button
+                  onClick={() => setDeletingUser(null)}
+                  className="h-12 px-5 rounded-xl border border-border text-sm text-muted-foreground"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Lista de usuários */}
         <div className="section-card !space-y-0 !p-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
@@ -266,10 +490,21 @@ export default function GerenciarUsuarios() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    {u.tipo === 'admin' ? (
-                      <Shield size={16} className="text-primary" />
-                    ) : (
-                      <User size={16} className="text-muted-foreground" />
+                    <button
+                      onClick={() => openEdit(u)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                      title="Editar"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    {u.id !== usuarioAtual?.id && (
+                      <button
+                        onClick={() => setDeletingUser(u)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        title="Remover"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     )}
                   </div>
                 </div>
