@@ -41,21 +41,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Barra superior gradiente */}
       <div className="bg-gradient-to-r from-primary via-rose-400 to-pink-300 h-1 sticky top-0 z-50" />
 
-      {/* Aviso de atualização do app */}
-      {swUpdate && (
-        <div className="sticky top-1 z-50 mx-4 mt-1">
-          <div className="bg-primary text-primary-foreground rounded-xl px-4 py-2.5 flex items-center justify-between shadow-lg text-sm font-medium">
-            <span>Nova versão disponível!</span>
-            <button
-              onClick={() => window.location.reload()}
-              className="ml-3 underline font-bold text-xs"
-            >
-              Atualizar
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <header className="sticky top-1 z-40 bg-card border-b border-border px-4 py-3 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
