@@ -129,6 +129,10 @@ export default function LoginPage() {
         0% { opacity: 0.3; transform: rotate(35deg) translateX(-40px); }
         100% { opacity: 0.8; transform: rotate(35deg) translateX(40px); }
       }
+      @keyframes orbFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(30px, -20px) scale(1.08); }
+      }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
