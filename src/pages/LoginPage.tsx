@@ -173,7 +173,7 @@ export default function LoginPage() {
           </div>
 
           {/* Logo image */}
-          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-16 object-contain mt-2" />
+          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2" />
 
           {/* System name */}
           <div className="mt-1">
