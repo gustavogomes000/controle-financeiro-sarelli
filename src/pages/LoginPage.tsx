@@ -12,14 +12,15 @@ function NetworkBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<Node[]>([]);
   const rafRef = useRef(0);
+  const mouseRef = useRef<{ x: number; y: number } | null>(null);
 
   const init = useCallback((w: number, h: number) => {
-    const count = Math.floor((w * h) / 11000);
+    const count = Math.max(40, Math.floor((w * h) / 8000));
     nodesRef.current = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
     }));
   }, []);
 
@@ -28,34 +29,51 @@ function NetworkBackground() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init(canvas.width, canvas.height);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.scale(dpr, dpr);
+      init(window.innerWidth, window.innerHeight);
     };
     resize();
     window.addEventListener('resize', resize);
 
+    const onMouseMove = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    const onMouseLeave = () => { mouseRef.current = null; };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseleave', onMouseLeave);
+
     const draw = () => {
-      const { width: w, height: h } = canvas;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.save();
+      ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const nodes = nodesRef.current;
-      const maxDist = 130;
+      const maxDist = 150;
+      const mouse = mouseRef.current;
+      const mouseMaxDist = 200;
 
       for (const n of nodes) {
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > w) n.vx *= -1;
         if (n.y < 0 || n.y > h) n.vy *= -1;
+        n.x = Math.max(0, Math.min(w, n.x));
+        n.y = Math.max(0, Math.min(h, n.y));
       }
 
-      ctx.strokeStyle = 'rgba(236,72,153,0.15)';
-      ctx.lineWidth = 0.8;
+      // Lines between nodes
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
           const d = Math.sqrt(dx * dx + dy * dy);
           if (d < maxDist) {
-            ctx.globalAlpha = 1 - d / maxDist;
+            const alpha = (1 - d / maxDist) * 0.25;
+            ctx.strokeStyle = `rgba(236,72,153,${alpha})`;
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -64,18 +82,52 @@ function NetworkBackground() {
         }
       }
 
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(236,72,153,0.4)';
+      // Lines to mouse
+      if (mouse) {
+        for (const n of nodes) {
+          const dx = n.x - mouse.x;
+          const dy = n.y - mouse.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < mouseMaxDist) {
+            const alpha = (1 - d / mouseMaxDist) * 0.3;
+            ctx.strokeStyle = `rgba(200,170,100,${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes with glow
       for (const n of nodes) {
+        const size = 2.5;
+        // Glow
+        const gradient = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, size * 4);
+        gradient.addColorStop(0, 'rgba(236,72,153,0.3)');
+        gradient.addColorStop(1, 'rgba(236,72,153,0)');
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, size * 4, 0, Math.PI * 2);
+        ctx.fill();
+        // Dot
+        ctx.fillStyle = 'rgba(236,72,153,0.6)';
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, size, 0, Math.PI * 2);
         ctx.fill();
       }
 
+      ctx.restore();
       rafRef.current = requestAnimationFrame(draw);
     };
     rafRef.current = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', resize); };
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseleave', onMouseLeave);
+    };
   }, [init]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
