@@ -21,7 +21,6 @@ import { gerarPdfConta } from '@/lib/gerarPdfConta';
 
 const STEPS = [
   { key: 'Lancada', label: 'Registrada', emoji: '📝' },
-  { key: 'Aprovada', label: 'Aprovada', emoji: '✅' },
   { key: 'Paga', label: 'Paga', emoji: '💰' },
 ];
 
