@@ -1,31 +1,119 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import Hyperspeed from '@/components/Hyperspeed';
 import { toast } from 'sonner';
+import logoSarelli from '@/assets/Logo_Sarelli.png';
 
-const APP_TITLE = 'Financeiro';
+/* ── Geometric Network Background ── */
+interface Node { x: number; y: number; vx: number; vy: number }
 
-const hyperspeedPreset = {
-  onSpeedUp: () => {}, onSlowDown: () => {},
-  distortion: 'turbulentDistortion',
-  length: 800, roadWidth: 18, islandWidth: 4, lanesPerRoad: 3,
-  fov: 100, fovSpeedUp: 140, speedUp: 2, carLightsFade: 0.4,
-  totalSideLightSticks: 40, lightPairsPerRoadWay: 80,
-  shoulderLinesWidthPercentage: 0.05, brokenLinesWidthPercentage: 0.1, brokenLinesLengthPercentage: 0.5,
-  lightStickWidth: [0.12, 0.5], lightStickHeight: [1.3, 1.7],
-  movingAwaySpeed: [60, 100], movingCloserSpeed: [-120, -180],
-  carLightsLength: [800 * 0.04, 800 * 0.14], carLightsRadius: [0.05, 0.14],
-  carWidthPercentage: [0.3, 0.5], carShiftX: [-0.8, 0.8], carFloorSeparation: [0, 5],
-  colors: {
-    roadColor: 0x080510, islandColor: 0x0a0812, background: 0x070510,
-    shoulderLines: 0x1a0a1a, brokenLines: 0x1a0a1a,
-    leftCars: [0xec4899, 0xf9a8d4, 0xbe185d, 0xfda4af],
-    rightCars: [0xf43f5e, 0xff6b9d, 0xc026d3, 0xe879f9],
-    sticks: 0xf472b6,
-  },
-};
+function NetworkBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const nodesRef = useRef<Node[]>([]);
+  const rafRef = useRef(0);
 
+  const init = useCallback((w: number, h: number) => {
+    const count = Math.floor((w * h) / 12000);
+    nodesRef.current = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+    }));
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      init(canvas.width, canvas.height);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const draw = () => {
+      const { width: w, height: h } = canvas;
+      ctx.clearRect(0, 0, w, h);
+      const nodes = nodesRef.current;
+      const maxDist = 140;
+
+      for (const n of nodes) {
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+
+      // lines
+      ctx.strokeStyle = 'rgba(232,160,180,0.15)';
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < maxDist) {
+            ctx.globalAlpha = 1 - d / maxDist;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // dots
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(232,160,180,0.5)';
+      for (const n of nodes) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    rafRef.current = requestAnimationFrame(draw);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', resize);
+    };
+  }, [init]);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
+}
+
+/* ── Light Streaks (right side) ── */
+function LightStreaks() {
+  return (
+    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+      {[0, 1, 2, 3, 4].map(i => (
+        <div
+          key={i}
+          className="absolute origin-center"
+          style={{
+            right: `${-5 + i * 6}%`,
+            top: `${20 + i * 12}%`,
+            width: '500px',
+            height: '2px',
+            background: i % 2 === 0
+              ? 'linear-gradient(90deg, transparent, #e91e8c88, #e91e8c44, transparent)'
+              : 'linear-gradient(90deg, transparent, #d4a85388, #d4a85344, transparent)',
+            transform: 'rotate(35deg)',
+            filter: 'blur(3px)',
+            animation: `streakFlow ${3 + i * 0.7}s ease-in-out infinite alternate`,
+            opacity: 0.6 + i * 0.08,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Main Login Page ── */
 export default function LoginPage() {
   const [nome, setNome] = useState(() => localStorage.getItem('saved_user') || '');
   const [password, setPassword] = useState(() => localStorage.getItem('saved_pass') || '');
@@ -35,7 +123,17 @@ export default function LoginPage() {
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
 
-  const preset = useMemo(() => hyperspeedPreset, []);
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes streakFlow {
+        0% { opacity: 0.3; transform: rotate(35deg) translateX(-40px); }
+        100% { opacity: 0.8; transform: rotate(35deg) translateX(40px); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,37 +159,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: '#070510' }}>
-      <Hyperspeed effectOptions={preset} />
-      <div className="absolute top-0 left-0 right-0 h-[2px] z-[2]" style={{ background: 'linear-gradient(90deg, #ec4899, #fb7185, #a855f7, #ec4899)' }} />
-      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(7,5,16,0.5) 100%)' }} />
-      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl bg-pink-500/25 pointer-events-none brand-float-slow" />
-      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl bg-purple-500/20 pointer-events-none brand-float-slow" />
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
+      <NetworkBackground />
+      <LightStreaks />
 
-      <div className="w-full max-w-sm space-y-6 relative z-10 brand-fade-up">
-        <div className="text-center space-y-3">
-          <div className="relative mx-auto w-24 h-24 brand-float-slow">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center shadow-[0_0_40px_rgba(236,72,153,0.4)]">
-              <span className="text-3xl font-black text-white tracking-tight">FS</span>
-            </div>
-            <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-black brand-pulse-glow" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">Dra. Fernanda Sarelli</h1>
-            <div className="flex items-center justify-center gap-2 mt-1">
-              <span className="h-[2px] w-5 rounded-full bg-gradient-to-r from-pink-500 to-rose-400" />
-              <p className="text-xs font-medium text-pink-400 uppercase tracking-widest">{APP_TITLE}</p>
-              <span className="h-[2px] w-5 rounded-full bg-gradient-to-r from-rose-400 to-pink-500" />
+      {/* Content */}
+      <div className="w-full max-w-sm space-y-5 relative z-10">
+
+        {/* Logo Section */}
+        <div className="text-center space-y-2">
+          {/* Profile photo circle */}
+          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853] shadow-lg">
+            <div className="w-full h-full rounded-full overflow-hidden bg-white">
+              <img src={logoSarelli} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
             </div>
           </div>
-          <p className="text-[11px] text-white/40">Acesso exclusivo da equipe</p>
+
+          <div className="mt-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-gray-500 font-medium">Doutora Fernanda</p>
+            <h1 className="text-[44px] font-extrabold text-gray-800 leading-none -mt-1 tracking-tight">SARELLI</h1>
+            {/* pink underline accent */}
+            <div className="mx-auto mt-1 w-24 h-[3px] rounded-full" style={{ background: 'linear-gradient(90deg, #e91e8c, #f472b6)' }} />
+          </div>
+
+          <p className="text-sm uppercase tracking-[0.3em] font-semibold" style={{ color: '#d4a853' }}>Financeiro</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Acesso exclusivo da equipe</p>
+          <p className="text-[10px] uppercase tracking-[0.15em] font-medium" style={{ color: '#d4a853' }}>Painel de Pagamentos Financeiro</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-black/60 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] shadow-[0_8px_32px_hsl(340_82%_55%/0.15)]">
+        {/* Login Card */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-2xl p-6 border border-white/60"
+          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+        >
+          {/* User field */}
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Usuário</label>
+            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Usuário</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <input
@@ -101,16 +207,17 @@ export default function LoginPage() {
                 onChange={e => setNome(e.target.value)}
                 autoComplete="username"
                 required
-                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-4 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
+                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-4 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
                 style={{ fontSize: '16px' }}
               />
             </div>
           </div>
 
+          {/* Password field */}
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Senha</label>
+            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Senha</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <input
@@ -120,10 +227,10 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-10 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
+                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-10 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
                 style={{ fontSize: '16px' }}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors" tabIndex={-1}>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
                 {showPassword
                   ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
                   : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -132,35 +239,38 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Remember */}
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
               id="remember"
               checked={remember}
               onChange={e => setRemember(e.target.checked)}
-              className="w-4 h-4 rounded border-white/20 bg-white/10 accent-pink-500 cursor-pointer"
+              className="w-4 h-4 rounded border-gray-300 accent-[#e91e8c] cursor-pointer"
             />
-            <label htmlFor="remember" className="text-xs text-white/50 cursor-pointer select-none">Lembrar meus dados</label>
+            <label htmlFor="remember" className="text-xs text-gray-500 cursor-pointer select-none">Lembrar meus dados</label>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-11 rounded-lg font-semibold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60"
-            style={{ background: 'linear-gradient(to right, #ec4899, #fb7185)', boxShadow: '0 4px 16px hsl(340 82% 55% / 0.3)' }}
+            className="w-full h-12 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60 uppercase tracking-wider"
+            style={{ background: 'linear-gradient(135deg, #e91e8c, #d4a853)', boxShadow: '0 4px 20px rgba(233,30,140,0.3)' }}
           >
             {loading
               ? <span className="flex items-center justify-center gap-2"><span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />Entrando...</span>
-              : <span className="flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                  Entrar
-                </span>
+              : <span className="flex items-center justify-center gap-2">→ Entrar</span>
             }
           </button>
         </form>
 
-        <div className="text-center">
-          <p className="text-[10px] text-white/25">Controle Financeiro do Escritório · v2.0</p>
+        {/* Footer */}
+        <div className="text-center space-y-1 pt-2">
+          <p className="text-[11px] text-gray-400">Pré-candidata a Deputada Estadual — GO 2026</p>
+          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium hover:underline" style={{ color: '#e91e8c' }}>
+            drafernandacarelli.com.br
+          </a>
         </div>
       </div>
     </div>
