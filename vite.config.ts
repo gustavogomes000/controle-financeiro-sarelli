@@ -5,7 +5,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 process.env.VITE_APP_VERSION = Date.now().toString(36).toUpperCase();
 
-// https://vitejs.dev/config/
 export default defineConfig({
   server: {
     host: "::",
@@ -18,18 +17,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
-      manifest: {
-        name: "Controle Financeiro Sarelli",
-        short_name: "Controle",
-        display: "standalone",
-        theme_color: "#ec4899",
+      injectRegister: false,
+      devOptions: {
+        enabled: false,
       },
+      manifest: false,
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
-      }
-    })
+        navigateFallbackDenylist: [/^\/~oauth/],
+      },
+    }),
   ],
   resolve: {
     alias: {

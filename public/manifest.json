@@ -1,7 +1,7 @@
 {
-  "name": "Financeiro - Dra. Fernanda Sarelli",
-  "short_name": "Financeiro",
-  "description": "Controle Financeiro do Escritório - Dra. Fernanda Sarelli",
+  "name": "Contas a Pagar - Dra. Fernanda Sarelli",
+  "short_name": "Contas a Pagar",
+  "description": "Contas a Pagar do Escritório - Dra. Fernanda Sarelli",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

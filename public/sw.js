@@ -1,9 +1,9 @@
 /* ============================================
-   Service Worker — Financeiro Sarelli v2.0
+   Service Worker — Contas a Pagar v3.0
    Estratégia: Cache-first estático, Network-first API
    ============================================ */
 
-const CACHE_NAME = 'financeiro-sarelli-v2';
+const CACHE_NAME = 'contas-pagar-v3';
 const PRECACHE_URLS = ['/', '/index.html', '/manifest.json', '/favicon.svg', '/icon-192.png', '/icon-512.png'];
 
 /* ---------- INSTALL ---------- */
@@ -31,16 +31,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignorar não-GET
   if (request.method !== 'GET') return;
-
-  // Ignorar Supabase (auth, REST, storage)
   if (url.hostname.includes('supabase.co')) return;
-
-  // Ignorar chrome-extension
   if (url.protocol === 'chrome-extension:') return;
 
-  // Navegação (HTML) — network first com fallback para cache
+  // Navegação — network first com fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -54,7 +49,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets JS/CSS/fonts/images — cache first
+  // Assets — cache first
   event.respondWith(
     caches.match(request).then(cached => {
       if (cached) return cached;
@@ -72,13 +67,13 @@ self.addEventListener('fetch', (event) => {
 /* ---------- PUSH NOTIFICATIONS ---------- */
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Financeiro Sarelli';
+  const title = data.title || 'Contas a Pagar';
   const options = {
     body: data.body || 'Você tem contas a vencer em breve.',
     icon: '/icon-192.png',
     badge: '/icon-192.png',
     vibrate: [100, 50, 100, 50, 100],
-    tag: data.tag || 'financeiro-notif',
+    tag: data.tag || 'contas-notif',
     renotify: true,
     data: { url: data.url || '/' },
     actions: [
@@ -108,7 +103,7 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-/* ---------- BACKGROUND SYNC (futuro) ---------- */
+/* ---------- BACKGROUND SYNC ---------- */
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-contas') {
     // Placeholder para sincronização offline futura
