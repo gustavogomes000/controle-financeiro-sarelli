@@ -2,16 +2,31 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Registro do Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+// Guard: não registrar SW em iframe ou preview do Lovable
+const isInIframe = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
+
+const isPreviewHost =
+  window.location.hostname.includes("id-preview--") ||
+  window.location.hostname.includes("lovableproject.com");
+
+if (isPreviewHost || isInIframe) {
+  navigator.serviceWorker?.getRegistrations().then((regs) => {
+    regs.forEach((r) => r.unregister());
+  });
+} else if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
-      .then(reg => {
-        // Verifica atualização do SW periodicamente
+      .register("/sw.js", { scope: "/" })
+      .then((reg) => {
         setInterval(() => reg.update(), 60 * 60 * 1000);
       })
-      .catch(err => console.warn('[SW] Falha no registro:', err));
+      .catch((err) => console.warn("[SW] Falha no registro:", err));
   });
 }
 
