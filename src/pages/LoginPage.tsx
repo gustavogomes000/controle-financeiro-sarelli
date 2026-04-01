@@ -1,30 +1,111 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import Hyperspeed from '@/components/Hyperspeed';
 import { toast } from 'sonner';
 import fotoFernanda from '@/assets/foto-fernanda.png';
 import logoSarelli from '@/assets/Logo_Sarelli.png';
 
-const hyperspeedPreset = {
-  onSpeedUp: () => {}, onSlowDown: () => {},
-  distortion: 'turbulentDistortion',
-  length: 800, roadWidth: 18, islandWidth: 4, lanesPerRoad: 3,
-  fov: 100, fovSpeedUp: 140, speedUp: 2, carLightsFade: 0.4,
-  totalSideLightSticks: 40, lightPairsPerRoadWay: 80,
-  shoulderLinesWidthPercentage: 0.05, brokenLinesWidthPercentage: 0.1, brokenLinesLengthPercentage: 0.5,
-  lightStickWidth: [0.12, 0.5], lightStickHeight: [1.3, 1.7],
-  movingAwaySpeed: [60, 100], movingCloserSpeed: [-120, -180],
-  carLightsLength: [800 * 0.04, 800 * 0.14], carLightsRadius: [0.05, 0.14],
-  carWidthPercentage: [0.3, 0.5], carShiftX: [-0.8, 0.8], carFloorSeparation: [0, 5],
-  colors: {
-    roadColor: 0x1a0a12, islandColor: 0x1a0812, background: 0x140a10,
-    shoulderLines: 0x2a1020, brokenLines: 0x2a1020,
-    leftCars: [0xe91e8c, 0xf9a8d4, 0xd4a853, 0xfda4af],
-    rightCars: [0xf43f5e, 0xd4a853, 0xc026d3, 0xe879f9],
-    sticks: 0xf472b6,
-  },
-};
+/* ── Geometric Network (pink dots + lines) ── */
+interface Node { x: number; y: number; vx: number; vy: number }
+
+function NetworkBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const nodesRef = useRef<Node[]>([]);
+  const rafRef = useRef(0);
+
+  const init = useCallback((w: number, h: number) => {
+    const count = Math.floor((w * h) / 14000);
+    nodesRef.current = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+    }));
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      init(canvas.width, canvas.height);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const draw = () => {
+      const { width: w, height: h } = canvas;
+      ctx.clearRect(0, 0, w, h);
+      const nodes = nodesRef.current;
+      const maxDist = 130;
+
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+
+      ctx.strokeStyle = 'rgba(220,130,160,0.18)';
+      ctx.lineWidth = 0.7;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < maxDist) {
+            ctx.globalAlpha = 1 - d / maxDist;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(233,30,140,0.35)';
+      for (const n of nodes) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    rafRef.current = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', resize); };
+  }, [init]);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
+}
+
+/* ── Animated Light Streaks (pink + gold, bottom-right) ── */
+function LightStreaks() {
+  return (
+    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+      {[0, 1, 2, 3, 4, 5, 6].map(i => (
+        <div
+          key={i}
+          className="absolute origin-center"
+          style={{
+            right: `${-10 + i * 5}%`,
+            top: `${30 + i * 8}%`,
+            width: '600px',
+            height: i < 3 ? '3px' : '2px',
+            background: i % 2 === 0
+              ? 'linear-gradient(90deg, transparent 0%, #e91e8c55 30%, #e91e8c88 50%, #e91e8c44 70%, transparent 100%)'
+              : 'linear-gradient(90deg, transparent 0%, #d4a85355 30%, #d4a85388 50%, #d4a85344 70%, transparent 100%)',
+            transform: 'rotate(32deg)',
+            filter: `blur(${i < 3 ? 2 : 4}px)`,
+            animation: `streakMove ${2.5 + i * 0.5}s ease-in-out infinite alternate`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* ── Main ── */
 export default function LoginPage() {
@@ -35,7 +116,18 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(() => !!localStorage.getItem('saved_user'));
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
-  const preset = useMemo(() => hyperspeedPreset, []);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes streakMove {
+        0% { opacity: 0.4; transform: rotate(32deg) translateX(-30px); }
+        100% { opacity: 0.9; transform: rotate(32deg) translateX(30px); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,10 +154,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
-      <Hyperspeed effectOptions={preset} />
-      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(252,228,236,0.7) 100%)' }} />
-      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(233,30,140,0.15)', animation: 'brand-float-slow 8s ease-in-out infinite' }} />
-      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(212,168,83,0.15)', animation: 'brand-float-slow 10s ease-in-out infinite reverse' }} />
+      <NetworkBackground />
+      <LightStreaks />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
