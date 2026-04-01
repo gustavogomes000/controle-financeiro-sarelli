@@ -61,45 +61,41 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: '#140a10' }}>
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
       <Hyperspeed effectOptions={preset} />
-      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(20,10,16,0.6) 100%)' }} />
-      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl bg-pink-500/25 pointer-events-none z-[1]" style={{ animation: 'brand-float-slow 8s ease-in-out infinite' }} />
-      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(212,168,83,0.2)', animation: 'brand-float-slow 10s ease-in-out infinite reverse' }} />
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(252,228,236,0.7) 100%)' }} />
+      <div className="absolute -top-20 -left-20 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(233,30,140,0.15)', animation: 'brand-float-slow 8s ease-in-out infinite' }} />
+      <div className="absolute -bottom-20 -right-16 w-52 h-52 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'rgba(212,168,83,0.15)', animation: 'brand-float-slow 10s ease-in-out infinite reverse' }} />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
         <div className="text-center space-y-2">
-          {/* Photo with pink border */}
-          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853]" style={{ boxShadow: '0 0 40px rgba(233,30,140,0.4)' }}>
-            <div className="w-full h-full rounded-full overflow-hidden bg-black">
+          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853] shadow-lg">
+            <div className="w-full h-full rounded-full overflow-hidden bg-white">
               <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
             </div>
           </div>
-          <div className="absolute bottom-1 right-1/2 translate-x-[35px] w-4 h-4 rounded-full bg-emerald-500 border-2 border-black" style={{ animation: 'brand-pulse-glow 2s ease-in-out infinite' }} />
 
-          {/* Logo image */}
-          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2 brightness-[2] contrast-[1.1]" />
+          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2" />
 
-          {/* System name */}
           <div className="mt-1">
             <p className="text-lg uppercase tracking-[0.3em] font-bold" style={{ color: '#d4a853' }}>Contas a Pagar</p>
           </div>
 
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Acesso exclusivo da equipe</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Acesso exclusivo da equipe</p>
           <p className="text-[10px] uppercase tracking-[0.15em] font-medium" style={{ color: '#d4a853' }}>Painel de Pagamentos Financeiro</p>
         </div>
 
         {/* Login Card */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl p-6 border border-white/[0.08]"
-          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px hsl(340 82% 55% / 0.15)' }}
+          className="space-y-4 rounded-2xl p-6 border border-white/60"
+          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
         >
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Usuário</label>
+            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Usuário</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <input
@@ -109,16 +105,16 @@ export default function LoginPage() {
                 onChange={e => setNome(e.target.value)}
                 autoComplete="username"
                 required
-                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-4 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
+                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-4 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
                 style={{ fontSize: '16px' }}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-widest text-white/50 font-medium block">Senha</label>
+            <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Senha</label>
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <input
@@ -128,10 +124,10 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="w-full bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-white/25 focus:border-pink-500/50 h-11 pl-10 pr-10 rounded-lg text-sm outline-none focus:ring-1 focus:ring-pink-500/20"
+                className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-10 rounded-lg text-sm outline-none transition-colors focus:border-[#e91e8c] focus:ring-2 focus:ring-[#e91e8c]/20"
                 style={{ fontSize: '16px' }}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors" tabIndex={-1}>
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
                 {showPassword
                   ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
                   : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -141,8 +137,8 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-white/20 bg-white/10 accent-pink-500 cursor-pointer" />
-            <label htmlFor="remember" className="text-xs text-white/50 cursor-pointer select-none">Lembrar meus dados</label>
+            <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#e91e8c] cursor-pointer" />
+            <label htmlFor="remember" className="text-xs text-gray-500 cursor-pointer select-none">Lembrar meus dados</label>
           </div>
 
           <button
@@ -159,8 +155,8 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center space-y-1 pt-2">
-          <p className="text-[11px] text-white/25">Pré-candidata a Deputada Estadual — GO 2026</p>
-          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium text-pink-400 hover:underline">
+          <p className="text-[11px] text-gray-400">Pré-candidata a Deputada Estadual — GO 2026</p>
+          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium hover:underline" style={{ color: '#e91e8c' }}>
             drafernandacarelli.com.br
           </a>
         </div>
