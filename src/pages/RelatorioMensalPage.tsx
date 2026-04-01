@@ -249,7 +249,7 @@ export default function RelatorioMensalPage() {
   </table>
 
   <div class="footer">
-    Controle Financeiro · Dra. Fernanda Sarelli · ${contas.length} conta${contas.length !== 1 ? 's' : ''} · Total ${fmt(totalGeral)}
+    Contas a Pagar · Dra. Fernanda Sarelli · ${contas.length} conta${contas.length !== 1 ? 's' : ''} · Total ${fmt(totalGeral)}
   </div>
   <script>window.onload = () => window.print();</script>
 </body>

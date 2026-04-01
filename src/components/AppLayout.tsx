@@ -49,7 +49,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <span className="text-xs font-black text-primary-foreground">FS</span>
             </div>
             <div>
-              <h1 className="text-sm font-bold text-foreground leading-tight">Controle Financeiro</h1>
+              <h1 className="text-sm font-bold text-foreground leading-tight">Contas a Pagar</h1>
               <p className="text-[11px] text-muted-foreground">Dra. Fernanda Sarelli</p>
             </div>
           </div>

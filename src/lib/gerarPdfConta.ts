@@ -123,7 +123,7 @@ export function gerarPdfConta(conta: ContaData) {
   ` : ''}
 
   <div class="footer">
-    Documento gerado em ${fmtDateTime(new Date().toISOString())} · Controle Financeiro · Dra. Fernanda Sarelli
+    Documento gerado em ${fmtDateTime(new Date().toISOString())} · Contas a Pagar · Dra. Fernanda Sarelli
   </div>
 
   <script>window.onload = () => window.print();</script>

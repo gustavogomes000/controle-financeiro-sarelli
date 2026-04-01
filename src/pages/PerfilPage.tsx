@@ -65,7 +65,7 @@ export default function PerfilPage() {
         </Button>
 
         <p className="text-micro text-center pt-4">
-          Financeiro Escritório v2.0 · Dra. Fernanda Sarelli
+          Contas a Pagar v2.0 · Dra. Fernanda Sarelli
         </p>
       </div>
     </AppLayout>
