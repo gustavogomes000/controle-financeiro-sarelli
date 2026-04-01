@@ -162,6 +162,11 @@ export default function LoginPage() {
       <NetworkBackground />
       <LightStreaks />
 
+      {/* Floating orbs */}
+      <div className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.18), transparent 70%)', animation: 'orbFloat 8s ease-in-out infinite' }} />
+      <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(212,168,83,0.15), transparent 70%)', animation: 'orbFloat 10s ease-in-out infinite reverse' }} />
+      <div className="absolute -bottom-20 left-1/4 w-56 h-56 rounded-full blur-3xl pointer-events-none z-[1]" style={{ background: 'radial-gradient(circle, rgba(233,30,140,0.12), transparent 70%)', animation: 'orbFloat 12s ease-in-out infinite 2s' }} />
+
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
         <div className="text-center space-y-2">
