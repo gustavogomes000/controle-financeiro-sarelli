@@ -92,8 +92,8 @@ export function gerarPdfConta(conta: ContaData) {
   <div class="header">
     <div class="logo">FS</div>
     <div class="header-text">
-      <h1>Controle Financeiro</h1>
-      <p>Dra. Fernanda Sarelli · Controle de Contas</p>
+      <h1>Contas a Pagar</h1>
+      <p>Dra. Fernanda Sarelli</p>
     </div>
   </div>
 
