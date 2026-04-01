@@ -143,6 +143,17 @@ export default function LoginPage() {
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
 
+  // Clear stale PWA cache on login page load
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(rs =>
+        rs.forEach(r => r.unregister())
+      ).then(() =>
+        caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      );
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !password.trim()) {
