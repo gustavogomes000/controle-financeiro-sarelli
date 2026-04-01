@@ -1,11 +1,11 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Shield } from 'lucide-react';
+import { LogOut, User, Shield, Users, ChevronRight } from 'lucide-react';
 import AppLayout from '@/components/AppLayout';
 
 export default function PerfilPage() {
-  const { usuario, signOut } = useAuth();
+  const { usuario, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -38,6 +38,23 @@ export default function PerfilPage() {
             <span className="font-mono text-xs text-muted-foreground">{usuario?.id?.slice(0, 8)}...</span>
           </div>
         </div>
+
+        {/* Link para Equipe (admin only) */}
+        {isAdmin && (
+          <button
+            onClick={() => navigate('/admin/usuarios')}
+            className="section-card flex items-center gap-3 w-full text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Users size={20} className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Gerenciar Equipe</p>
+              <p className="text-xs text-muted-foreground">Criar, editar e remover usuários</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </button>
+        )}
 
         <Button
           onClick={handleSignOut}

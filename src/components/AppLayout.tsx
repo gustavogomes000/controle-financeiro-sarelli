@@ -33,7 +33,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     ...(isAdmin ? [
       { path: '/admin', icon: TrendingUp, label: 'Gestão' },
       { path: '/admin/relatorio', icon: BarChart3, label: 'Relatório' },
-      { path: '/admin/usuarios', icon: Users, label: 'Equipe' },
     ] : []),
     { path: '/perfil', icon: User, label: 'Perfil' },
   ];
