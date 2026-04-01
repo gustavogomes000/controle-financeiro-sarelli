@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusCircle, BarChart3, User, TrendingUp, Users } from 'lucide-react';
+import { Home, PlusCircle, BarChart3, User, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import InstallPWA from '@/components/InstallPWA';
@@ -9,9 +9,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const [swUpdate, setSwUpdate] = useState(false);
 
-  // Detecta atualização do service worker
+  // Auto-reload silencioso quando há nova versão do SW
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
     navigator.serviceWorker.ready.then(reg => {
@@ -20,13 +19,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         if (!newWorker) return;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            setSwUpdate(true);
+            window.location.reload();
           }
         });
       });
     });
   }, []);
-
   const navItems = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/nova-conta', icon: PlusCircle, label: 'Nova' },
