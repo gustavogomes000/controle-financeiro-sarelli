@@ -71,29 +71,30 @@ export default function LoginPage() {
         {/* Logo Section */}
         <div className="text-center space-y-2">
           {/* Photo with pink border */}
-          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853] shadow-lg">
-            <div className="w-full h-full rounded-full overflow-hidden bg-white">
+          <div className="mx-auto w-[120px] h-[120px] rounded-full p-[3px] bg-gradient-to-br from-[#e91e8c] to-[#d4a853]" style={{ boxShadow: '0 0 40px rgba(233,30,140,0.4)' }}>
+            <div className="w-full h-full rounded-full overflow-hidden bg-black">
               <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
             </div>
           </div>
+          <div className="absolute bottom-1 right-1/2 translate-x-[35px] w-4 h-4 rounded-full bg-emerald-500 border-2 border-black" style={{ animation: 'brand-pulse-glow 2s ease-in-out infinite' }} />
 
           {/* Logo image */}
-          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2" />
+          <img src={logoSarelli} alt="Logo Sarelli" className="mx-auto h-28 object-contain mt-2 brightness-[2] contrast-[1.1]" />
 
           {/* System name */}
           <div className="mt-1">
             <p className="text-lg uppercase tracking-[0.3em] font-bold" style={{ color: '#d4a853' }}>Contas a Pagar</p>
           </div>
 
-          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Acesso exclusivo da equipe</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Acesso exclusivo da equipe</p>
           <p className="text-[10px] uppercase tracking-[0.15em] font-medium" style={{ color: '#d4a853' }}>Painel de Pagamentos Financeiro</p>
         </div>
 
         {/* Login Card */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl p-6 border border-white/60"
-          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+          className="space-y-4 rounded-2xl p-6 border border-white/[0.08]"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px hsl(340 82% 55% / 0.15)' }}
         >
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">Usuário</label>
