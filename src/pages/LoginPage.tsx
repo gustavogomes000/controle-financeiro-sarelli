@@ -14,7 +14,7 @@ function NetworkBackground() {
   const rafRef = useRef(0);
 
   const init = useCallback((w: number, h: number) => {
-    const count = Math.floor((w * h) / 12000);
+    const count = Math.floor((w * h) / 11000);
     nodesRef.current = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -39,7 +39,7 @@ function NetworkBackground() {
       const { width: w, height: h } = canvas;
       ctx.clearRect(0, 0, w, h);
       const nodes = nodesRef.current;
-      const maxDist = 120;
+      const maxDist = 130;
 
       for (const n of nodes) {
         n.x += n.vx; n.y += n.vy;
@@ -47,8 +47,8 @@ function NetworkBackground() {
         if (n.y < 0 || n.y > h) n.vy *= -1;
       }
 
-      ctx.strokeStyle = 'rgba(236,72,153,0.12)';
-      ctx.lineWidth = 0.6;
+      ctx.strokeStyle = 'rgba(236,72,153,0.15)';
+      ctx.lineWidth = 0.8;
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
@@ -65,10 +65,10 @@ function NetworkBackground() {
       }
 
       ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(236,72,153,0.3)';
+      ctx.fillStyle = 'rgba(236,72,153,0.4)';
       for (const n of nodes) {
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -90,23 +90,6 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(() => !!localStorage.getItem('saved_user'));
   const { signInByNome } = useAuth();
   const navigate = useNavigate();
-
-  /* Inject keyframes for the pulsing border */
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes borderSpin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      @keyframes pulseGlow {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,137 +117,165 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-[100dvh] flex flex-col items-center justify-start sm:justify-center overflow-y-auto relative"
-      style={{ background: 'linear-gradient(145deg, #fef2f2 0%, #fdf2f8 50%, #fef2f2 100%)' }}
+      style={{ background: 'linear-gradient(160deg, #fde8ef 0%, #fdf2f8 40%, #fce4ec 100%)' }}
     >
       <NetworkBackground />
 
-      <div className="w-full max-w-sm relative z-10 px-4 py-8 sm:py-0">
-        {/* Photo + Logo header */}
+      <div className="w-full max-w-md relative z-10 px-4 py-6 sm:py-0">
+        {/* Photo */}
         <div className="flex flex-col items-center">
-          {/* Circular photo */}
-          <div className="w-[90px] h-[90px] sm:w-[110px] sm:h-[110px] rounded-full border-4 border-pink-400 overflow-hidden shadow-lg bg-white">
-            <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
+          <div
+            className="rounded-full p-[4px] shadow-xl"
+            style={{
+              background: 'linear-gradient(135deg, #ec4899, #f472b6)',
+              width: 'clamp(100px, 18vw, 140px)',
+              height: 'clamp(100px, 18vw, 140px)',
+            }}
+          >
+            <div className="w-full h-full rounded-full overflow-hidden bg-white">
+              <img src={fotoFernanda} alt="Dra. Fernanda Sarelli" className="w-full h-full object-cover" />
+            </div>
           </div>
 
-          {/* Logo overlapping photo */}
+          {/* Logo */}
           <img
             src={logoSarelli}
             alt="Logo Sarelli"
-            className="h-36 sm:h-44 object-contain -mt-6"
+            className="h-32 sm:h-40 object-contain -mt-3"
           />
 
           {/* Subtitle */}
           <p
-            className="text-sm sm:text-base uppercase tracking-[0.25em] font-semibold -mt-2"
+            className="text-sm sm:text-[15px] uppercase tracking-[0.3em] font-semibold mt-1 mb-5"
             style={{ color: '#c8aa64' }}
           >
             Painel de Pagamentos
           </p>
         </div>
 
-        {/* Card with animated pulsing border */}
-        <div className="relative mt-5 sm:mt-6">
-          {/* Animated border glow */}
-          <div
-            className="absolute -inset-[2px] rounded-2xl overflow-hidden"
-            style={{ animation: 'pulseGlow 3s ease-in-out infinite' }}
-          >
-            <div
-              className="w-[200%] h-[200%] absolute top-[-50%] left-[-50%]"
-              style={{
-                background: 'conic-gradient(from 0deg, transparent, #ec4899, transparent, #ec4899, transparent)',
-                animation: 'borderSpin 4s linear infinite',
-              }}
-            />
+        {/* Card */}
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl p-6 sm:p-8 space-y-5"
+          style={{
+            background: 'rgba(255, 240, 245, 0.65)',
+            backdropFilter: 'blur(12px)',
+            border: '1.5px solid rgba(236, 72, 153, 0.18)',
+            boxShadow: '0 8px 40px rgba(236, 72, 153, 0.08)',
+          }}
+        >
+          {/* Username */}
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-[0.18em] text-gray-700 font-bold block">
+              Usuário
+            </label>
+            <div className="relative">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c8aa64] w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Ex: Administrador"
+                value={nome}
+                onChange={e => setNome(e.target.value)}
+                autoComplete="username"
+                required
+                className="w-full bg-white/90 text-gray-800 placeholder:text-gray-400 h-12 pl-11 pr-4 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  fontSize: '16px',
+                  border: '1.5px solid rgba(200, 170, 100, 0.35)',
+                  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)',
+                }}
+                onFocus={e => { e.target.style.borderColor = '#ec4899'; e.target.style.boxShadow = '0 0 0 3px rgba(236,72,153,0.12)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(200,170,100,0.35)'; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.04)'; }}
+              />
+            </div>
           </div>
 
-          {/* Card content */}
-          <form
-            onSubmit={handleSubmit}
-            className="relative space-y-4 sm:space-y-5 rounded-2xl p-5 sm:p-8"
+          {/* Password */}
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-[0.18em] text-gray-700 font-bold block">
+              Senha
+            </label>
+            <div className="relative">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c8aa64] w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                className="w-full bg-white/90 text-gray-800 placeholder:text-gray-400 h-12 pl-11 pr-11 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  fontSize: '16px',
+                  border: '1.5px solid rgba(200, 170, 100, 0.35)',
+                  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)',
+                }}
+                onFocus={e => { e.target.style.borderColor = '#ec4899'; e.target.style.boxShadow = '0 0 0 3px rgba(236,72,153,0.12)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(200,170,100,0.35)'; e.target.style.boxShadow = 'inset 0 1px 3px rgba(0,0,0,0.04)'; }}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: '#c8aa64' }} tabIndex={-1}>
+                {showPassword
+                  ? <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
+                  : <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          {/* Remember */}
+          <div className="flex items-center gap-2.5">
+            <input
+              type="checkbox"
+              id="remember"
+              checked={remember}
+              onChange={e => setRemember(e.target.checked)}
+              className="w-4 h-4 rounded-full border-gray-300 accent-pink-500 cursor-pointer"
+            />
+            <label htmlFor="remember" className="text-[13px] text-gray-500 cursor-pointer select-none">
+              Lembrar meus dados
+            </label>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-[52px] rounded-xl font-bold text-[15px] text-white transition-all active:scale-[0.98] disabled:opacity-60 tracking-wide flex items-center justify-center gap-2.5"
             style={{
-              background: 'rgba(255,255,255,0.80)',
-              backdropFilter: 'blur(12px)',
+              background: 'linear-gradient(135deg, #ec4899 0%, #e8796e 50%, #c8aa64 100%)',
+              boxShadow: '0 6px 24px rgba(236,72,153,0.3)',
             }}
           >
-            {/* Username */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">
-                Usuário
-              </label>
-              <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {loading ? (
+              <>
+                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                Entrando...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
-                <input
-                  type="text"
-                  placeholder="Seu nome de acesso"
-                  value={nome}
-                  onChange={e => setNome(e.target.value)}
-                  autoComplete="username"
-                  required
-                  className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-4 rounded-lg text-sm outline-none transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-                  style={{ fontSize: '16px' }}
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-widest text-gray-600 font-bold block">
-                Senha
-              </label>
-              <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                  className="w-full bg-white border border-gray-200 text-gray-800 placeholder:text-gray-400 h-11 pl-10 pr-10 rounded-lg text-sm outline-none transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
-                  style={{ fontSize: '16px' }}
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
-                  {showPassword
-                    ? <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
-                    : <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  }
-                </button>
-              </div>
-            </div>
-
-            {/* Remember */}
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="remember" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-pink-500 cursor-pointer" />
-              <label htmlFor="remember" className="text-xs text-gray-500 cursor-pointer select-none">Lembrar meus dados</label>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-60 uppercase tracking-wider flex items-center justify-center gap-2"
-              style={{
-                background: 'linear-gradient(135deg, #ec4899, #f43f5e)',
-                boxShadow: '0 4px 20px rgba(236,72,153,0.35)',
-              }}
-            >
-              {loading
-                ? <><span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />Entrando...</>
-                : <>→ Entrar</>
-              }
-            </button>
-          </form>
-        </div>
+                Entrar
+              </>
+            )}
+          </button>
+        </form>
 
         {/* Footer */}
-        <div className="text-center space-y-1 pt-4">
+        <div className="text-center space-y-1 pt-5 pb-4">
           <p className="text-[11px] text-gray-400">Pré-candidata a Deputada Estadual — GO 2026</p>
-          <a href="https://drafernandacarelli.com.br" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium text-pink-500 hover:underline">
+          <a
+            href="https://drafernandacarelli.com.br"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] font-medium hover:underline"
+            style={{ color: '#ec4899' }}
+          >
             drafernandacarelli.com.br
           </a>
         </div>
