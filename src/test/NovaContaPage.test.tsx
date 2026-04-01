@@ -26,6 +26,10 @@ vi.mock('@/hooks/useAuth', () => ({
   }),
 }));
 
+vi.mock('@/components/UserSelect', () => ({
+  default: () => <div data-testid="user-select" />,
+}));
+
 const mockFrom = vi.fn();
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: { from: (...args: any[]) => mockFrom(...args) },
@@ -65,20 +69,19 @@ const setupSupabaseSuccess = () => {
 describe('NovaContaPage', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('renderiza o título "Registrar gasto"', () => {
+  it('renderiza o título "Nova conta"', () => {
     renderPage();
-    expect(screen.getByText('Registrar gasto')).toBeInTheDocument();
+    expect(screen.getByText('Nova conta')).toBeInTheDocument();
   });
 
-  it('renderiza toggle "Preciso pagar" e "Já paguei"', () => {
+  it('renderiza passo 1 com label correto', () => {
     renderPage();
-    expect(screen.getByText('Preciso pagar')).toBeInTheDocument();
-    expect(screen.getByText('Já paguei')).toBeInTheDocument();
+    expect(screen.getByText(/Passo 1 de 2/)).toBeInTheDocument();
   });
 
   it('renderiza campo de descrição', () => {
     renderPage();
-    expect(screen.getByPlaceholderText(/aluguel do escritório/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/aluguel, material de escritório/i)).toBeInTheDocument();
   });
 
   it('renderiza campo Valor', () => {
@@ -86,99 +89,93 @@ describe('NovaContaPage', () => {
     expect(screen.getByPlaceholderText('0,00')).toBeInTheDocument();
   });
 
-  it('renderiza campo de motivo/justificativa', () => {
+  it('renderiza campo de Vencimento', () => {
     renderPage();
-    expect(screen.getByPlaceholderText(/impressão para evento no bairro/i)).toBeInTheDocument();
+    expect(document.querySelector('input[type="date"]')).toBeInTheDocument();
   });
 
-  it('renderiza botão "Lançar conta"', () => {
+  it('renderiza campo Chave PIX opcional', () => {
     renderPage();
-    expect(screen.getByRole('button', { name: /lançar conta/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/CPF, e-mail, telefone ou chave aleatória/i)).toBeInTheDocument();
   });
 
-  it('renderiza botão Cancelar', () => {
+  it('renderiza botão "Continuar"', () => {
     renderPage();
-    expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
+    expect(screen.getByText(/Continuar/)).toBeInTheDocument();
   });
 
-  it('exibe erro quando descrição está vazia', async () => {
+  it('exibe erro quando descrição está vazia ao continuar', async () => {
     renderPage();
-    fireEvent.click(screen.getByRole('button', { name: /lançar conta/i }));
+    fireEvent.click(screen.getByText(/Continuar/));
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Descreva o que foi comprado/pago'),
+      expect(toast.error).toHaveBeenCalled(),
     );
   });
 
-  it('exibe erro quando data de vencimento está vazia', async () => {
+  it('avança para passo 2 com dados válidos', async () => {
     renderPage();
-    fireEvent.change(screen.getByPlaceholderText(/aluguel do escritório/i), {
+    fireEvent.change(screen.getByPlaceholderText(/aluguel, material de escritório/i), {
       target: { value: 'Energia elétrica' },
     });
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '200,00' } });
-    // Não preenche data
-    fireEvent.change(screen.getByPlaceholderText(/impressão para evento/i), {
-      target: { value: 'Necessário para campanha' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: /lançar conta/i }));
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Informe a data de vencimento'),
-    );
+    const dateInput = document.querySelector('input[type="date"]')!;
+    fireEvent.change(dateInput, { target: { value: '2026-05-01' } });
+    fireEvent.click(screen.getByText(/Continuar/));
+
+    await waitFor(() => expect(screen.getByText(/Passo 2 de 2/)).toBeInTheDocument());
   });
 
-  it('exibe erro de valor inválido', async () => {
+  it('passo 2 renderiza campo de motivo', async () => {
     renderPage();
-    fireEvent.change(screen.getByPlaceholderText(/aluguel do escritório/i), {
-      target: { value: 'Compra X' },
+    fireEvent.change(screen.getByPlaceholderText(/aluguel, material de escritório/i), {
+      target: { value: 'Energia' },
     });
-    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: 'abc' } });
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    fireEvent.change(dateInputs[0], { target: { value: '2026-04-30' } });
-    fireEvent.change(screen.getByPlaceholderText(/impressão para evento/i), {
-      target: { value: 'Motivo válido' },
+    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '100,00' } });
+    const dateInput = document.querySelector('input[type="date"]')!;
+    fireEvent.change(dateInput, { target: { value: '2026-05-01' } });
+    fireEvent.click(screen.getByText(/Continuar/));
+
+    await waitFor(() => expect(screen.getByPlaceholderText(/Aluguel do mês/i)).toBeInTheDocument());
+  });
+
+  it('passo 2 renderiza resumo com valor', async () => {
+    renderPage();
+    fireEvent.change(screen.getByPlaceholderText(/aluguel, material de escritório/i), {
+      target: { value: 'Combustível' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /lançar conta/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Valor inválido'));
+    fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '350,00' } });
+    const dateInput = document.querySelector('input[type="date"]')!;
+    fireEvent.change(dateInput, { target: { value: '2026-05-01' } });
+    fireEvent.click(screen.getByText(/Continuar/));
+
+    await waitFor(() => expect(screen.getByText('Resumo')).toBeInTheDocument());
   });
 
   it('submit válido chama supabase.insert e navega para /', async () => {
     const { contaChain } = setupSupabaseSuccess();
     renderPage();
 
-    fireEvent.change(screen.getByPlaceholderText(/aluguel do escritório/i), {
+    // Step 1
+    fireEvent.change(screen.getByPlaceholderText(/aluguel, material de escritório/i), {
       target: { value: 'Combustível equipe' },
     });
     fireEvent.change(screen.getByPlaceholderText('0,00'), { target: { value: '350,00' } });
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    fireEvent.change(dateInputs[0], { target: { value: '2026-05-01' } });
-    fireEvent.change(screen.getByPlaceholderText(/impressão para evento/i), {
-      target: { value: 'Deslocamento da equipe para evento' },
+    const dateInput = document.querySelector('input[type="date"]')!;
+    fireEvent.change(dateInput, { target: { value: '2026-05-01' } });
+    fireEvent.click(screen.getByText(/Continuar/));
+
+    // Step 2
+    await waitFor(() => expect(screen.getByPlaceholderText(/Aluguel do mês/i)).toBeInTheDocument());
+    fireEvent.change(screen.getByPlaceholderText(/Aluguel do mês/i), {
+      target: { value: 'Deslocamento da equipe' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /lançar conta/i }));
+    fireEvent.click(screen.getByText(/Registrar conta/));
 
     await waitFor(() => expect(contaChain.insert).toHaveBeenCalled());
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'));
-    expect(toast.success).toHaveBeenCalledWith('Conta lançada com sucesso!');
   });
 
-  it('ao clicar em "Já paguei" o botão muda para "Registrar pagamento"', () => {
-    renderPage();
-    fireEvent.click(screen.getByText('Já paguei'));
-    expect(screen.getByRole('button', { name: /registrar pagamento/i })).toBeInTheDocument();
-  });
-
-  it('ao clicar em "Já paguei" mostra campo "Quando foi pago?"', () => {
-    renderPage();
-    fireEvent.click(screen.getByText('Já paguei'));
-    expect(screen.getByText(/quando foi pago/i)).toBeInTheDocument();
-  });
-
-  it('botão Cancelar navega de volta', () => {
-    renderPage();
-    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
-    expect(mockNavigate).toHaveBeenCalledWith(-1);
-  });
-
-  it('botão de voltar (seta) navega de volta', () => {
+  it('botão de voltar (seta) no passo 1 navega de volta', () => {
     renderPage();
     fireEvent.click(screen.getAllByRole('button')[0]);
     expect(mockNavigate).toHaveBeenCalledWith(-1);

@@ -43,7 +43,7 @@ describe('LoginPage', () => {
 
   it('renderiza os campos de usuário e senha', () => {
     renderLogin();
-    expect(screen.getByPlaceholderText(/seu nome de acesso/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ex: administrador/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
   });
 
@@ -69,7 +69,7 @@ describe('LoginPage', () => {
     mockSignInByNome.mockResolvedValue({ error: null });
     renderLogin();
 
-    fireEvent.change(screen.getByPlaceholderText(/seu nome de acesso/i), {
+    fireEvent.change(screen.getByPlaceholderText(/ex: administrador/i), {
       target: { value: 'Administrador' },
     });
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
@@ -86,7 +86,7 @@ describe('LoginPage', () => {
     mockSignInByNome.mockResolvedValue({ error: null });
     renderLogin();
 
-    fireEvent.change(screen.getByPlaceholderText(/seu nome de acesso/i), {
+    fireEvent.change(screen.getByPlaceholderText(/ex: administrador/i), {
       target: { value: 'Admin' },
     });
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
@@ -101,7 +101,7 @@ describe('LoginPage', () => {
     mockSignInByNome.mockResolvedValue({ error: new Error('invalid') });
     renderLogin();
 
-    fireEvent.change(screen.getByPlaceholderText(/seu nome de acesso/i), {
+    fireEvent.change(screen.getByPlaceholderText(/ex: administrador/i), {
       target: { value: 'Admin' },
     });
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
@@ -131,7 +131,7 @@ describe('LoginPage', () => {
     mockSignInByNome.mockResolvedValue({ error: null });
     renderLogin();
 
-    fireEvent.change(screen.getByPlaceholderText(/seu nome de acesso/i), {
+    fireEvent.change(screen.getByPlaceholderText(/ex: administrador/i), {
       target: { value: 'João' },
     });
     fireEvent.change(screen.getByPlaceholderText('••••••••'), {
@@ -153,7 +153,7 @@ describe('LoginPage', () => {
     localStorage.setItem('saved_pass', 'xyz');
     renderLogin();
 
-    expect(screen.getByPlaceholderText(/seu nome de acesso/i)).toHaveValue('Maria');
+    expect(screen.getByPlaceholderText(/ex: administrador/i)).toHaveValue('Maria');
     expect(screen.getByPlaceholderText('••••••••')).toHaveValue('xyz');
   });
 });
