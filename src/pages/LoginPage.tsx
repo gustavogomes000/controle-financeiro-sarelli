@@ -169,8 +169,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
       <NetworkBackground />
-      <LightStreaks />
-      <WaveTrails />
+      <FiberBeams />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
