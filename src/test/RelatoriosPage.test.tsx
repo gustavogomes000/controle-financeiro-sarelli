@@ -95,11 +95,11 @@ describe('RelatoriosPage', () => {
     expect(card.textContent).toMatch(/R\$/);
   });
 
-  it('renderiza seção "Por Categoria" com categorias dos dados', async () => {
+  it('renderiza seção "POR CATEGORIA" com categorias dos dados', async () => {
     mockUseAuth.mockReturnValue(adminAuth);
     renderPage();
     await waitFor(() => {
-      expect(screen.getByText('Por Categoria')).toBeInTheDocument();
+      expect(screen.getByText('POR CATEGORIA')).toBeInTheDocument();
       expect(screen.getByText('Material gráfico')).toBeInTheDocument();
       expect(screen.getByText('Combustível')).toBeInTheDocument();
       expect(screen.getByText('Eventos')).toBeInTheDocument();
