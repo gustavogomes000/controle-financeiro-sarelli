@@ -134,28 +134,10 @@ export default function LoginPage() {
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      @keyframes streakMove {
-        0% { opacity: 0.4; transform: rotate(32deg) translateX(-30px); }
-        100% { opacity: 0.9; transform: rotate(32deg) translateX(30px); }
+      @keyframes fiberPulse {
+        0% { opacity: 0.5; }
+        100% { opacity: 1; }
       }
-      @keyframes waveLeft {
-        0% { transform: translateX(0px) translateY(0px); }
-        100% { transform: translateX(-26px) translateY(-8px); }
-      }
-      @keyframes waveRight {
-        0% { transform: translateX(0px) translateY(0px); }
-        100% { transform: translateX(32px) translateY(6px); }
-      }
-      @keyframes waveRise {
-        0% { transform: translateX(0px) translateY(0px); opacity: 0.55; }
-        100% { transform: translateX(18px) translateY(-10px); opacity: 0.95; }
-      }
-      .wave-drift-left { animation: waveLeft 6s ease-in-out infinite alternate; }
-      .wave-drift-right { animation: waveRight 5s ease-in-out infinite alternate; }
-      .wave-drift-left-slow { animation: waveLeft 8s ease-in-out infinite alternate; }
-      .wave-rise { animation: waveRise 4.5s ease-in-out infinite alternate; }
-      .wave-rise-delay { animation: waveRise 5.5s ease-in-out infinite alternate-reverse; }
-      .wave-rise-soft { animation: waveRise 7s ease-in-out infinite alternate; }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
