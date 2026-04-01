@@ -68,7 +68,7 @@ describe('DashboardPage', () => {
     mockUseAuth.mockReturnValue(adminUser);
     renderDashboard();
     await waitFor(() => expect(screen.getByText(/Olá,/)).toBeInTheDocument());
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.textContent?.trim() === 'Admin')).toBeInTheDocument();
   });
 
   it('renderiza as 3 abas de resumo (A pagar, Vencidas, Pago)', async () => {
