@@ -418,6 +418,90 @@ export type Database = {
           },
         ]
       }
+      fiscais: {
+        Row: {
+          cadastrado_por: string | null
+          colegio_eleitoral: string | null
+          criado_em: string | null
+          id: string
+          lideranca_id: string | null
+          municipio_id: string | null
+          observacoes: string | null
+          origem_captacao: string | null
+          pessoa_id: string
+          secao_fiscal: string | null
+          status: string | null
+          suplente_id: string | null
+          zona_fiscal: string | null
+        }
+        Insert: {
+          cadastrado_por?: string | null
+          colegio_eleitoral?: string | null
+          criado_em?: string | null
+          id?: string
+          lideranca_id?: string | null
+          municipio_id?: string | null
+          observacoes?: string | null
+          origem_captacao?: string | null
+          pessoa_id: string
+          secao_fiscal?: string | null
+          status?: string | null
+          suplente_id?: string | null
+          zona_fiscal?: string | null
+        }
+        Update: {
+          cadastrado_por?: string | null
+          colegio_eleitoral?: string | null
+          criado_em?: string | null
+          id?: string
+          lideranca_id?: string | null
+          municipio_id?: string | null
+          observacoes?: string | null
+          origem_captacao?: string | null
+          pessoa_id?: string
+          secao_fiscal?: string | null
+          status?: string | null
+          suplente_id?: string | null
+          zona_fiscal?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscais_cadastrado_por_fkey"
+            columns: ["cadastrado_por"]
+            isOneToOne: false
+            referencedRelation: "hierarquia_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscais_lideranca_id_fkey"
+            columns: ["lideranca_id"]
+            isOneToOne: false
+            referencedRelation: "liderancas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscais_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscais_pessoa_id_fkey"
+            columns: ["pessoa_id"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscais_suplente_id_fkey"
+            columns: ["suplente_id"]
+            isOneToOne: false
+            referencedRelation: "suplentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fornecedores: {
         Row: {
           agencia: string | null
@@ -569,64 +653,124 @@ export type Database = {
           },
         ]
       }
+      hierarquia_usuarios: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          auth_user_id: string | null
+          criado_em: string | null
+          id: string
+          municipio_id: string | null
+          nome: string
+          superior_id: string | null
+          suplente_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_usuario"]
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          auth_user_id?: string | null
+          criado_em?: string | null
+          id?: string
+          municipio_id?: string | null
+          nome: string
+          superior_id?: string | null
+          suplente_id?: string | null
+          tipo: Database["public"]["Enums"]["tipo_usuario"]
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          auth_user_id?: string | null
+          criado_em?: string | null
+          id?: string
+          municipio_id?: string | null
+          nome?: string
+          superior_id?: string | null
+          suplente_id?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_usuario"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hierarquia_usuarios_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hierarquia_usuarios_superior_id_fkey"
+            columns: ["superior_id"]
+            isOneToOne: false
+            referencedRelation: "hierarquia_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       liderancas: {
         Row: {
           apoiadores_estimados: number | null
-          atualizado_em: string
+          atualizado_em: string | null
           bairros_influencia: string | null
           cadastrado_por: string | null
           comunidades_influencia: string | null
-          criado_em: string
+          criado_em: string | null
           id: string
           lider_principal_id: string | null
           meta_votos: number | null
+          municipio_id: string | null
           nivel: string | null
           nivel_comprometimento: string | null
           observacoes: string | null
           origem_captacao: string | null
           pessoa_id: string
           regiao_atuacao: string | null
-          status: string
+          status: string | null
+          suplente_id: string | null
           tipo_lideranca: string | null
           zona_atuacao: string | null
         }
         Insert: {
           apoiadores_estimados?: number | null
-          atualizado_em?: string
+          atualizado_em?: string | null
           bairros_influencia?: string | null
           cadastrado_por?: string | null
           comunidades_influencia?: string | null
-          criado_em?: string
+          criado_em?: string | null
           id?: string
           lider_principal_id?: string | null
           meta_votos?: number | null
+          municipio_id?: string | null
           nivel?: string | null
           nivel_comprometimento?: string | null
           observacoes?: string | null
           origem_captacao?: string | null
           pessoa_id: string
           regiao_atuacao?: string | null
-          status?: string
+          status?: string | null
+          suplente_id?: string | null
           tipo_lideranca?: string | null
           zona_atuacao?: string | null
         }
         Update: {
           apoiadores_estimados?: number | null
-          atualizado_em?: string
+          atualizado_em?: string | null
           bairros_influencia?: string | null
           cadastrado_por?: string | null
           comunidades_influencia?: string | null
-          criado_em?: string
+          criado_em?: string | null
           id?: string
           lider_principal_id?: string | null
           meta_votos?: number | null
+          municipio_id?: string | null
           nivel?: string | null
           nivel_comprometimento?: string | null
           observacoes?: string | null
           origem_captacao?: string | null
           pessoa_id?: string
           regiao_atuacao?: string | null
-          status?: string
+          status?: string | null
+          suplente_id?: string | null
           tipo_lideranca?: string | null
           zona_atuacao?: string | null
         }
@@ -635,7 +779,7 @@ export type Database = {
             foreignKeyName: "liderancas_cadastrado_por_fkey"
             columns: ["cadastrado_por"]
             isOneToOne: false
-            referencedRelation: "usuarios"
+            referencedRelation: "hierarquia_usuarios"
             referencedColumns: ["id"]
           },
           {
@@ -646,10 +790,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "liderancas_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "liderancas_pessoa_id_fkey"
             columns: ["pessoa_id"]
             isOneToOne: false
             referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liderancas_suplente_id_fkey"
+            columns: ["suplente_id"]
+            isOneToOne: false
+            referencedRelation: "suplentes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      localizacoes_usuarios: {
+        Row: {
+          bateria_nivel: number | null
+          criado_em: string
+          em_movimento: boolean | null
+          endereco_ip: string | null
+          fonte: string | null
+          id: string
+          latitude: number
+          longitude: number
+          precisao: number | null
+          user_agent: string | null
+          usuario_id: string
+        }
+        Insert: {
+          bateria_nivel?: number | null
+          criado_em?: string
+          em_movimento?: boolean | null
+          endereco_ip?: string | null
+          fonte?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          precisao?: number | null
+          user_agent?: string | null
+          usuario_id: string
+        }
+        Update: {
+          bateria_nivel?: number | null
+          criado_em?: string
+          em_movimento?: boolean | null
+          endereco_ip?: string | null
+          fonte?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          precisao?: number | null
+          user_agent?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "localizacoes_usuarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "hierarquia_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -729,12 +937,37 @@ export type Database = {
         }
         Relationships: []
       }
+      municipios: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          id: string
+          nome: string
+          uf: string
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          nome: string
+          uf?: string
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          id?: string
+          nome?: string
+          uf?: string
+        }
+        Relationships: []
+      }
       pessoas: {
         Row: {
           atualizado_em: string
           colegio_eleitoral: string | null
           cpf: string | null
           criado_em: string
+          data_nascimento: string | null
           email: string | null
           endereco_colegio: string | null
           facebook: string | null
@@ -742,6 +975,9 @@ export type Database = {
           instagram: string | null
           municipio_eleitoral: string | null
           nome: string
+          observacoes_gerais: string | null
+          origem: string | null
+          outras_redes: string | null
           secao_eleitoral: string | null
           situacao_titulo: string | null
           telefone: string | null
@@ -755,6 +991,7 @@ export type Database = {
           colegio_eleitoral?: string | null
           cpf?: string | null
           criado_em?: string
+          data_nascimento?: string | null
           email?: string | null
           endereco_colegio?: string | null
           facebook?: string | null
@@ -762,6 +999,9 @@ export type Database = {
           instagram?: string | null
           municipio_eleitoral?: string | null
           nome: string
+          observacoes_gerais?: string | null
+          origem?: string | null
+          outras_redes?: string | null
           secao_eleitoral?: string | null
           situacao_titulo?: string | null
           telefone?: string | null
@@ -775,6 +1015,7 @@ export type Database = {
           colegio_eleitoral?: string | null
           cpf?: string | null
           criado_em?: string
+          data_nascimento?: string | null
           email?: string | null
           endereco_colegio?: string | null
           facebook?: string | null
@@ -782,6 +1023,9 @@ export type Database = {
           instagram?: string | null
           municipio_eleitoral?: string | null
           nome?: string
+          observacoes_gerais?: string | null
+          origem?: string | null
+          outras_redes?: string | null
           secao_eleitoral?: string | null
           situacao_titulo?: string | null
           telefone?: string | null
@@ -791,6 +1035,91 @@ export type Database = {
           zona_eleitoral?: string | null
         }
         Relationships: []
+      }
+      possiveis_eleitores: {
+        Row: {
+          cadastrado_por: string | null
+          compromisso_voto: string | null
+          criado_em: string | null
+          fiscal_id: string | null
+          id: string
+          lideranca_id: string | null
+          municipio_id: string | null
+          observacoes: string | null
+          origem_captacao: string | null
+          pessoa_id: string
+          suplente_id: string | null
+        }
+        Insert: {
+          cadastrado_por?: string | null
+          compromisso_voto?: string | null
+          criado_em?: string | null
+          fiscal_id?: string | null
+          id?: string
+          lideranca_id?: string | null
+          municipio_id?: string | null
+          observacoes?: string | null
+          origem_captacao?: string | null
+          pessoa_id: string
+          suplente_id?: string | null
+        }
+        Update: {
+          cadastrado_por?: string | null
+          compromisso_voto?: string | null
+          criado_em?: string | null
+          fiscal_id?: string | null
+          id?: string
+          lideranca_id?: string | null
+          municipio_id?: string | null
+          observacoes?: string | null
+          origem_captacao?: string | null
+          pessoa_id?: string
+          suplente_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "possiveis_eleitores_cadastrado_por_fkey"
+            columns: ["cadastrado_por"]
+            isOneToOne: false
+            referencedRelation: "hierarquia_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "possiveis_eleitores_fiscal_id_fkey"
+            columns: ["fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "fiscais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "possiveis_eleitores_lideranca_id_fkey"
+            columns: ["lideranca_id"]
+            isOneToOne: false
+            referencedRelation: "liderancas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "possiveis_eleitores_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "possiveis_eleitores_pessoa_id_fkey"
+            columns: ["pessoa_id"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "possiveis_eleitores_suplente_id_fkey"
+            columns: ["suplente_id"]
+            isOneToOne: false
+            referencedRelation: "suplentes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roles_painel: {
         Row: {
@@ -833,6 +1162,273 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sindspag_associados: {
+        Row: {
+          apoiadores: number | null
+          atualizado_em: string
+          colegio_eleitoral: string | null
+          comprometimento: string | null
+          cpf: string | null
+          criado_em: string
+          criado_por: string | null
+          eh_socio_atual: boolean | null
+          email: string | null
+          facebook: string | null
+          foi_socio_quando: string | null
+          id: string
+          instagram: string | null
+          ja_foi_socio: boolean | null
+          ligacao_politica: string | null
+          meta_votos: number | null
+          municipio: string | null
+          nome: string
+          observacoes: string | null
+          posicao_ligacao: string | null
+          regiao_atuacao: string | null
+          secao_eleitoral: string | null
+          situacao_titulo: string | null
+          socio_desde: string | null
+          status: string | null
+          telefone: string | null
+          titulo_eleitor: string | null
+          uf: string | null
+          whatsapp: string | null
+          zona_eleitoral: string | null
+        }
+        Insert: {
+          apoiadores?: number | null
+          atualizado_em?: string
+          colegio_eleitoral?: string | null
+          comprometimento?: string | null
+          cpf?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          eh_socio_atual?: boolean | null
+          email?: string | null
+          facebook?: string | null
+          foi_socio_quando?: string | null
+          id?: string
+          instagram?: string | null
+          ja_foi_socio?: boolean | null
+          ligacao_politica?: string | null
+          meta_votos?: number | null
+          municipio?: string | null
+          nome: string
+          observacoes?: string | null
+          posicao_ligacao?: string | null
+          regiao_atuacao?: string | null
+          secao_eleitoral?: string | null
+          situacao_titulo?: string | null
+          socio_desde?: string | null
+          status?: string | null
+          telefone?: string | null
+          titulo_eleitor?: string | null
+          uf?: string | null
+          whatsapp?: string | null
+          zona_eleitoral?: string | null
+        }
+        Update: {
+          apoiadores?: number | null
+          atualizado_em?: string
+          colegio_eleitoral?: string | null
+          comprometimento?: string | null
+          cpf?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          eh_socio_atual?: boolean | null
+          email?: string | null
+          facebook?: string | null
+          foi_socio_quando?: string | null
+          id?: string
+          instagram?: string | null
+          ja_foi_socio?: boolean | null
+          ligacao_politica?: string | null
+          meta_votos?: number | null
+          municipio?: string | null
+          nome?: string
+          observacoes?: string | null
+          posicao_ligacao?: string | null
+          regiao_atuacao?: string | null
+          secao_eleitoral?: string | null
+          situacao_titulo?: string | null
+          socio_desde?: string | null
+          status?: string | null
+          telefone?: string | null
+          titulo_eleitor?: string | null
+          uf?: string | null
+          whatsapp?: string | null
+          zona_eleitoral?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sindspag_associados_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "sindspag_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sindspag_usuarios: {
+        Row: {
+          cargo: string
+          criado_em: string
+          id: string
+          nome: string
+          senha_hash: string
+        }
+        Insert: {
+          cargo?: string
+          criado_em?: string
+          id?: string
+          nome: string
+          senha_hash: string
+        }
+        Update: {
+          cargo?: string
+          criado_em?: string
+          id?: string
+          nome?: string
+          senha_hash?: string
+        }
+        Relationships: []
+      }
+      suplente_municipio: {
+        Row: {
+          criado_em: string
+          id: string
+          municipio_id: string
+          suplente_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          municipio_id: string
+          suplente_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          municipio_id?: string
+          suplente_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suplente_municipio_municipio_id_fkey"
+            columns: ["municipio_id"]
+            isOneToOne: false
+            referencedRelation: "municipios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suplentes: {
+        Row: {
+          ano_eleicao: number | null
+          assinatura: string | null
+          base_politica: string | null
+          cargo_disputado: string | null
+          created_at: string
+          expectativa_votos: number | null
+          fiscais_qtd: number | null
+          fiscais_valor_unit: number | null
+          id: string
+          liderancas_qtd: number | null
+          liderancas_valor_unit: number | null
+          nome: string
+          partido: string | null
+          plotagem_qtd: number | null
+          plotagem_valor_unit: number | null
+          regiao_atuacao: string | null
+          retirada_mensal_meses: number | null
+          retirada_mensal_valor: number | null
+          situacao: string | null
+          telefone: string | null
+          total_campanha: number | null
+          total_votos: number | null
+          updated_at: string
+        }
+        Insert: {
+          ano_eleicao?: number | null
+          assinatura?: string | null
+          base_politica?: string | null
+          cargo_disputado?: string | null
+          created_at?: string
+          expectativa_votos?: number | null
+          fiscais_qtd?: number | null
+          fiscais_valor_unit?: number | null
+          id?: string
+          liderancas_qtd?: number | null
+          liderancas_valor_unit?: number | null
+          nome: string
+          partido?: string | null
+          plotagem_qtd?: number | null
+          plotagem_valor_unit?: number | null
+          regiao_atuacao?: string | null
+          retirada_mensal_meses?: number | null
+          retirada_mensal_valor?: number | null
+          situacao?: string | null
+          telefone?: string | null
+          total_campanha?: number | null
+          total_votos?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ano_eleicao?: number | null
+          assinatura?: string | null
+          base_politica?: string | null
+          cargo_disputado?: string | null
+          created_at?: string
+          expectativa_votos?: number | null
+          fiscais_qtd?: number | null
+          fiscais_valor_unit?: number | null
+          id?: string
+          liderancas_qtd?: number | null
+          liderancas_valor_unit?: number | null
+          nome?: string
+          partido?: string | null
+          plotagem_qtd?: number | null
+          plotagem_valor_unit?: number | null
+          regiao_atuacao?: string | null
+          retirada_mensal_meses?: number | null
+          retirada_mensal_valor?: number | null
+          situacao?: string | null
+          telefone?: string | null
+          total_campanha?: number | null
+          total_votos?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usuario_modulos: {
+        Row: {
+          criado_em: string
+          id: string
+          modulo: string
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          modulo: string
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          modulo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_modulos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "hierarquia_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuarios: {
         Row: {
@@ -890,8 +1486,33 @@ export type Database = {
       criar_primeiro_admin: { Args: { _email: string }; Returns: undefined }
       eh_admin: { Args: { _user_id: string }; Returns: boolean }
       eh_admin_painel: { Args: { _user_id: string }; Returns: boolean }
+      eh_super_admin: { Args: never; Returns: boolean }
+      get_meu_suplente_id: { Args: never; Returns: string }
+      get_meu_tipo: {
+        Args: never
+        Returns: Database["public"]["Enums"]["tipo_usuario"]
+      }
+      get_meu_usuario_id: { Args: never; Returns: string }
+      get_subordinados: { Args: { usuario_id: string }; Returns: string[] }
       get_usuario_id: { Args: never; Returns: string }
       is_app_admin: { Args: never; Returns: boolean }
+      sindspag_atualizar_cargo: {
+        Args: { p_cargo: string; p_user_id: string }
+        Returns: Json
+      }
+      sindspag_criar_usuario: {
+        Args: { p_cargo?: string; p_nome: string; p_senha: string }
+        Returns: Json
+      }
+      sindspag_deletar_usuario: { Args: { p_user_id: string }; Returns: Json }
+      sindspag_login: {
+        Args: { p_nome: string; p_senha: string }
+        Returns: Json
+      }
+      sindspag_resetar_senha: {
+        Args: { p_nova_senha: string; p_user_id: string }
+        Returns: Json
+      }
       tem_cargo: {
         Args: {
           _cargo: Database["public"]["Enums"]["cargo_admin"]
@@ -909,6 +1530,12 @@ export type Database = {
     }
     Enums: {
       cargo_admin: "super_admin" | "admin" | "editor"
+      tipo_usuario:
+        | "super_admin"
+        | "coordenador"
+        | "suplente"
+        | "lideranca"
+        | "fiscal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1037,6 +1664,13 @@ export const Constants = {
   public: {
     Enums: {
       cargo_admin: ["super_admin", "admin", "editor"],
+      tipo_usuario: [
+        "super_admin",
+        "coordenador",
+        "suplente",
+        "lideranca",
+        "fiscal",
+      ],
     },
   },
 } as const
