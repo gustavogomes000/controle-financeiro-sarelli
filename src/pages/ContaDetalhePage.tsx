@@ -164,8 +164,8 @@ export default function ContaDetalhePage() {
     setAvisoSemComprovante(false);
 
     const updates: any = { status: newStatus, atualizado_em: new Date().toISOString() };
-    if (newStatus === 'Aprovada') updates.aprovado_por = usuario.id;
     if (newStatus === 'Paga') {
+      updates.aprovado_por = usuario.id;
       updates.pago_por = pagoPor || usuario.id;
       updates.data_pagamento = new Date().toISOString().split('T')[0];
       if (formaPagamento) updates.forma_pagamento = formaPagamento;
