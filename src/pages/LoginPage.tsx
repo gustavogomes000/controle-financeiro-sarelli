@@ -81,54 +81,42 @@ function NetworkBackground() {
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" />;
 }
 
-/* ── Animated Light Streaks (pink + gold, bottom-right) ── */
-function LightStreaks() {
+/* ── Fiber-optic light beams from bottom-right corner ── */
+function FiberBeams() {
+  const beams: { angle: number; color: string; w: number; blur: number; delay: number }[] = [];
+  for (let i = 0; i < 22; i++) {
+    const isPink = i % 3 !== 1;
+    beams.push({
+      angle: -48 + i * 2.8 + (i % 2 ? 0.5 : -0.5),
+      color: isPink
+        ? `rgba(233,30,140,${0.15 + (i % 4) * 0.06})`
+        : `rgba(212,168,83,${0.25 + (i % 3) * 0.08})`,
+      w: isPink ? 1.5 + (i % 3) * 0.5 : 2 + (i % 2),
+      blur: isPink ? 1.5 : 2.5,
+      delay: i * 0.18,
+    });
+  }
+
   return (
     <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
-      {[0, 1, 2, 3, 4, 5, 6].map(i => (
+      {beams.map((b, i) => (
         <div
           key={i}
-          className="absolute origin-center"
+          className="absolute"
           style={{
-            right: `${-10 + i * 5}%`,
-            top: `${30 + i * 8}%`,
-            width: '600px',
-            height: i < 3 ? '3px' : '2px',
-            background: i % 2 === 0
-              ? 'linear-gradient(90deg, transparent 0%, #e91e8c55 30%, #e91e8c88 50%, #e91e8c44 70%, transparent 100%)'
-              : 'linear-gradient(90deg, transparent 0%, #d4a85355 30%, #d4a85388 50%, #d4a85344 70%, transparent 100%)',
-            transform: 'rotate(32deg)',
-            filter: `blur(${i < 3 ? 2 : 4}px)`,
-            animation: `streakMove ${2.5 + i * 0.5}s ease-in-out infinite alternate`,
+            bottom: '-5%',
+            right: '-8%',
+            width: '900px',
+            height: `${b.w}px`,
+            background: `linear-gradient(90deg, transparent 0%, ${b.color} 25%, ${b.color} 60%, transparent 100%)`,
+            transformOrigin: 'right bottom',
+            transform: `rotate(${b.angle}deg)`,
+            filter: `blur(${b.blur}px)`,
+            animation: `fiberPulse ${3 + b.delay}s ease-in-out infinite alternate`,
+            animationDelay: `${b.delay}s`,
           }}
         />
       ))}
-    </div>
-  );
-}
-
-function WaveTrails() {
-  return (
-    <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden opacity-80">
-      <svg className="absolute -left-[8%] bottom-[10%] w-[78%] h-[28%]" viewBox="0 0 900 280" fill="none" preserveAspectRatio="none">
-        <path d="M0 250 C170 210, 300 230, 460 180 S760 120, 900 150" stroke="rgba(233,30,140,0.26)" strokeWidth="16" strokeLinecap="round" filter="url(#blurPinkA)" className="wave-drift-left"/>
-        <path d="M0 262 C190 225, 340 245, 500 200 S770 145, 900 170" stroke="rgba(212,168,83,0.34)" strokeWidth="10" strokeLinecap="round" filter="url(#blurGoldA)" className="wave-drift-right"/>
-        <path d="M0 272 C150 242, 300 258, 455 222 S760 175, 900 195" stroke="rgba(233,30,140,0.18)" strokeWidth="7" strokeLinecap="round" className="wave-drift-left-slow"/>
-        <defs>
-          <filter id="blurPinkA"><feGaussianBlur stdDeviation="7" /></filter>
-          <filter id="blurGoldA"><feGaussianBlur stdDeviation="5" /></filter>
-        </defs>
-      </svg>
-
-      <svg className="absolute right-[-12%] bottom-[6%] w-[60%] h-[38%]" viewBox="0 0 760 360" fill="none" preserveAspectRatio="none">
-        <path d="M0 320 C150 300, 220 220, 340 190 S560 140, 760 70" stroke="rgba(212,168,83,0.50)" strokeWidth="8" strokeLinecap="round" filter="url(#blurGoldB)" className="wave-rise"/>
-        <path d="M0 338 C135 315, 245 238, 360 208 S585 160, 760 98" stroke="rgba(233,30,140,0.32)" strokeWidth="12" strokeLinecap="round" filter="url(#blurPinkB)" className="wave-rise-delay"/>
-        <path d="M0 348 C170 325, 270 270, 392 230 S596 190, 760 132" stroke="rgba(212,168,83,0.20)" strokeWidth="5" strokeLinecap="round" className="wave-rise-soft"/>
-        <defs>
-          <filter id="blurGoldB"><feGaussianBlur stdDeviation="4" /></filter>
-          <filter id="blurPinkB"><feGaussianBlur stdDeviation="6" /></filter>
-        </defs>
-      </svg>
     </div>
   );
 }
@@ -146,28 +134,10 @@ export default function LoginPage() {
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      @keyframes streakMove {
-        0% { opacity: 0.4; transform: rotate(32deg) translateX(-30px); }
-        100% { opacity: 0.9; transform: rotate(32deg) translateX(30px); }
+      @keyframes fiberPulse {
+        0% { opacity: 0.5; }
+        100% { opacity: 1; }
       }
-      @keyframes waveLeft {
-        0% { transform: translateX(0px) translateY(0px); }
-        100% { transform: translateX(-26px) translateY(-8px); }
-      }
-      @keyframes waveRight {
-        0% { transform: translateX(0px) translateY(0px); }
-        100% { transform: translateX(32px) translateY(6px); }
-      }
-      @keyframes waveRise {
-        0% { transform: translateX(0px) translateY(0px); opacity: 0.55; }
-        100% { transform: translateX(18px) translateY(-10px); opacity: 0.95; }
-      }
-      .wave-drift-left { animation: waveLeft 6s ease-in-out infinite alternate; }
-      .wave-drift-right { animation: waveRight 5s ease-in-out infinite alternate; }
-      .wave-drift-left-slow { animation: waveLeft 8s ease-in-out infinite alternate; }
-      .wave-rise { animation: waveRise 4.5s ease-in-out infinite alternate; }
-      .wave-rise-delay { animation: waveRise 5.5s ease-in-out infinite alternate-reverse; }
-      .wave-rise-soft { animation: waveRise 7s ease-in-out infinite alternate; }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
@@ -199,8 +169,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fce4ec 0%, #fdf0f4 50%, #fce4ec 100%)' }}>
       <NetworkBackground />
-      <LightStreaks />
-      <WaveTrails />
+      <FiberBeams />
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Logo Section */}
