@@ -198,6 +198,38 @@ export default function ContaDetalhePage() {
     changeStatus('Paga');
   };
 
+  // Extração inteligente do boleto
+  const extrairDadosBoleto = async (url: string) => {
+    setExtraindo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extrair-boleto', {
+        body: { imageUrl: url },
+      });
+      if (!error && data) {
+        if (data.codigo_barras) setCodigoBoleto(data.codigo_barras);
+        setBoletoInfo({
+          valor: data.valor,
+          vencimento: data.vencimento,
+          beneficiario: data.beneficiario,
+          tipo: data.tipo,
+        });
+        if (data.codigo_barras) {
+          toast.success('Código de barras extraído automaticamente!');
+        } else if (data.valor) {
+          toast.success('Dados da conta extraídos!');
+        }
+      }
+    } catch {
+      // silently fail — user can still input manually
+    }
+    setExtraindo(false);
+  };
+
+  const handleBoletoUploaded = (url: string) => {
+    setConta({ ...conta, comprovante_url: url });
+    extrairDadosBoleto(url);
+  };
+
   const handleGerarPdf = () => {
     if (!conta) return;
     gerarPdfConta({
