@@ -627,6 +627,7 @@ export default function ContaDetalhePage() {
                   <Upload size={12} /> Trocar documento
                 </button>
               </>
+            ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
                   Anexe o boleto ou conta para leitura automática dos dados.
