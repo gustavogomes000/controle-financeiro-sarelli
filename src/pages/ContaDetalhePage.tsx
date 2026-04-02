@@ -83,10 +83,6 @@ export default function ContaDetalhePage() {
       setChavePix(conta.chave_pix);
       setFormaPagamento(prev => prev || 'PIX');
     }
-    // Auto-extrair boleto se tem URL e conta não foi paga
-    if (conta?.comprovante_url && conta?.status !== 'Paga' && !codigoBoleto && !boletoInfo) {
-      extrairDadosBoleto(conta.comprovante_url);
-    }
   }, [conta?.id]);
 
   const fetchUsuarios = async () => {
