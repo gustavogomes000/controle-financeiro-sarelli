@@ -39,6 +39,12 @@ export default function NovaContaPage() {
   const [diaRecorrente, setDiaRecorrente] = useState('');
   const [mesesRecorrencia, setMesesRecorrencia] = useState('12');
 
+  // Anexo do boleto/conta
+  const [anexo, setAnexo] = useState<File | null>(null);
+  const [anexoPreview, setAnexoPreview] = useState<string | null>(null);
+  const inputGaleriaRef = useRef<HTMLInputElement>(null);
+  const inputCameraRef = useRef<HTMLInputElement>(null);
+
   // Passo 2
   const [motivo, setMotivo] = useState('');
   const [criadoPor, setCriadoPor] = useState('');
