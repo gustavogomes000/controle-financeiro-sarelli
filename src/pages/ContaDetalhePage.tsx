@@ -625,10 +625,8 @@ export default function ContaDetalhePage() {
                   className="w-full h-10 rounded-xl border border-dashed border-border text-xs text-muted-foreground flex items-center justify-center gap-1.5 hover:border-primary/40 transition-colors"
                 >
                   <Upload size={12} /> Trocar documento
-                  </button>
-                </div>
+                </button>
               </>
-            ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
                   Anexe o boleto ou conta para leitura automática dos dados.
