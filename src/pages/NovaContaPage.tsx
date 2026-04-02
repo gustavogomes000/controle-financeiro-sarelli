@@ -132,6 +132,22 @@ export default function NovaContaPage() {
       return;
     }
 
+    // Upload anexo se houver
+    if (anexo) {
+      const ext = anexo.name.split('.').pop() || 'jpg';
+      const path = `${conta.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('comprovantes')
+        .upload(path, anexo, { upsert: true });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from('comprovantes').getPublicUrl(path);
+        await supabase
+          .from('contas_pagar')
+          .update({ comprovante_url: urlData.publicUrl })
+          .eq('id', conta.id);
+      }
+    }
+
     await supabase.from('contas_pagar_logs').insert({
       conta_id: conta.id,
       usuario_id: responsavel,
