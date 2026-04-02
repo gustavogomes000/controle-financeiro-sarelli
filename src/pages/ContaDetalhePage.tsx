@@ -724,6 +724,43 @@ export default function ContaDetalhePage() {
 
         <div className="pb-4" />
       </div>
+
+      {/* ═══════ LIGHTBOX / VISUALIZADOR INTERNO ═══════ */}
+      {viewerUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
+          onClick={() => setViewerUrl(null)}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 shrink-0">
+            <span className="text-white/70 text-sm font-medium">Visualizando documento</span>
+            <button
+              onClick={() => setViewerUrl(null)}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
+            {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(viewerUrl) ? (
+              <img
+                src={viewerUrl}
+                alt="Documento"
+                className="max-w-full max-h-full object-contain rounded-lg"
+                style={{ touchAction: 'pinch-zoom' }}
+              />
+            ) : (
+              <iframe
+                src={viewerUrl}
+                className="w-full h-full rounded-lg bg-white"
+                title="Visualizar PDF"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
