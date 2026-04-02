@@ -822,32 +822,31 @@ export default function ContaDetalhePage() {
 
           {/* Content */}
           <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
-            {viewerType === 'pdf' ? (
-              viewerLoading ? (
-                <div className="text-center space-y-2 text-white/80">
-                  <p className="text-sm font-medium">Abrindo PDF...</p>
-                  <p className="text-xs text-white/60">Carregando o documento dentro do app.</p>
-                </div>
-              ) : viewerError ? (
-                <div className="text-center space-y-2 text-white/80 max-w-sm">
-                  <p className="text-sm font-medium">{viewerError}</p>
-                  <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
-                </div>
-              ) : viewerBlobUrl ? (
+            {viewerLoading ? (
+              <div className="text-center space-y-2 text-white/80">
+                <p className="text-sm font-medium">Carregando...</p>
+              </div>
+            ) : viewerError ? (
+              <div className="text-center space-y-2 text-white/80 max-w-sm">
+                <p className="text-sm font-medium">{viewerError}</p>
+                <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
+              </div>
+            ) : viewerBlobUrl ? (
+              viewerType === 'pdf' ? (
                 <iframe
                   src={`${viewerBlobUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                   title="Documento PDF"
                   className="h-full w-full rounded-lg bg-background"
                 />
-              ) : null
-            ) : (
-              <img
-                src={viewerUrl}
-                alt="Documento"
-                className="max-w-full max-h-full object-contain rounded-lg"
-                style={{ touchAction: 'pinch-zoom' }}
-              />
-            )}
+              ) : (
+                <img
+                  src={viewerBlobUrl}
+                  alt="Documento"
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  style={{ touchAction: 'pinch-zoom' }}
+                />
+              )
+            ) : null}
           </div>
         </div>
       )}
