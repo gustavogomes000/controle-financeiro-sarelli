@@ -54,9 +54,7 @@ export default function ContaDetalhePage() {
   const [loading, setLoading] = useState(true);
   const [formaPagamento, setFormaPagamento] = useState('');
   const [chavePix, setChavePix] = useState('');
-  const [codigoBoleto, setCodigoBoleto] = useState('');
-  const [boletoInfo, setBoletoInfo] = useState<{ valor?: number | null; vencimento?: string | null; beneficiario?: string | null; tipo?: string | null } | null>(null);
-  const [extraindo, setExtraindo] = useState(false);
+  const [pagoPor, setPagoPor] = useState('');
   const [pagoPor, setPagoPor] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
