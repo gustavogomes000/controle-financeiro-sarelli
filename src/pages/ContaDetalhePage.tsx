@@ -55,6 +55,7 @@ export default function ContaDetalhePage() {
   const [formaPagamento, setFormaPagamento] = useState('');
   const [chavePix, setChavePix] = useState('');
   const [pagoPor, setPagoPor] = useState('');
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
 
