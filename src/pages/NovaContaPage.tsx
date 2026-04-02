@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, RefreshCw, HelpCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, HelpCircle, ImageIcon, Camera, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import AppLayout from '@/components/AppLayout';
 import UserSelect from '@/components/UserSelect';
@@ -39,11 +39,39 @@ export default function NovaContaPage() {
   const [diaRecorrente, setDiaRecorrente] = useState('');
   const [mesesRecorrencia, setMesesRecorrencia] = useState('12');
 
+  // Anexo do boleto/conta
+  const [anexo, setAnexo] = useState<File | null>(null);
+  const [anexoPreview, setAnexoPreview] = useState<string | null>(null);
+  const inputGaleriaRef = useRef<HTMLInputElement>(null);
+  const inputCameraRef = useRef<HTMLInputElement>(null);
+
   // Passo 2
   const [motivo, setMotivo] = useState('');
   const [criadoPor, setCriadoPor] = useState('');
 
   const responsavel = criadoPor || usuario?.id || '';
+
+  const handleAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Arquivo muito grande (máx. 10MB)');
+      return;
+    }
+    setAnexo(file);
+    if (file.type.startsWith('image/')) {
+      setAnexoPreview(URL.createObjectURL(file));
+    } else {
+      setAnexoPreview(null);
+    }
+  };
+
+  const removerAnexo = () => {
+    setAnexo(null);
+    setAnexoPreview(null);
+    if (inputGaleriaRef.current) inputGaleriaRef.current.value = '';
+    if (inputCameraRef.current) inputCameraRef.current.value = '';
+  };
 
   const handleValor = (raw: string) => {
     const nums = raw.replace(/\D/g, '');
@@ -102,6 +130,22 @@ export default function NovaContaPage() {
       toast.error('Erro ao salvar. Tente novamente.');
       setLoading(false);
       return;
+    }
+
+    // Upload anexo se houver
+    if (anexo) {
+      const ext = anexo.name.split('.').pop() || 'jpg';
+      const path = `${conta.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('comprovantes')
+        .upload(path, anexo, { upsert: true });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from('comprovantes').getPublicUrl(path);
+        await supabase
+          .from('contas_pagar')
+          .update({ comprovante_url: urlData.publicUrl })
+          .eq('id', conta.id);
+      }
     }
 
     await supabase.from('contas_pagar_logs').insert({
@@ -195,6 +239,66 @@ export default function NovaContaPage() {
                 />
                 <p className="text-[10px] text-muted-foreground">
                   Se souber agora, já deixa aqui para facilitar na hora do pagamento.
+                </p>
+              </div>
+
+              {/* Anexo da conta/boleto */}
+              <div className="space-y-1.5">
+                <label className="label-micro">Foto ou PDF da conta (opcional)</label>
+                <input
+                  ref={inputGaleriaRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={handleAnexo}
+                  className="hidden"
+                />
+                <input
+                  ref={inputCameraRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleAnexo}
+                  className="hidden"
+                />
+
+                {anexo ? (
+                  <div className="space-y-2">
+                    {anexoPreview && (
+                      <div className="relative rounded-xl overflow-hidden border border-border">
+                        <img src={anexoPreview} alt="Preview" className="w-full max-h-40 object-cover" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-50 border border-green-200">
+                      <span className="text-xs text-green-700 font-medium flex-1 truncate">
+                        📎 {anexo.name}
+                      </span>
+                      <button onClick={removerAnexo} className="text-red-400 hover:text-red-600 active:scale-90">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => inputGaleriaRef.current?.click()}
+                      className="h-14 rounded-xl border-2 border-dashed border-border bg-background flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all active:scale-95"
+                    >
+                      <ImageIcon size={18} />
+                      <span className="text-[10px] font-medium">Galeria / PDF</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => inputCameraRef.current?.click()}
+                      className="h-14 rounded-xl border-2 border-dashed border-border bg-background flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary transition-all active:scale-95"
+                    >
+                      <Camera size={18} />
+                      <span className="text-[10px] font-medium">Tirar foto</span>
+                    </button>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Anexe o boleto ou conta para facilitar o pagamento.
                 </p>
               </div>
             </div>

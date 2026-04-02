@@ -164,7 +164,14 @@ export default function LoginPage() {
     const { error } = await signInByNome(nome.trim(), password);
     setLoading(false);
     if (error) {
-      toast.error('Nome ou senha inválidos');
+      const msg = error?.message || String(error);
+      if (msg.includes('não encontrado') || msg.includes('not found')) {
+        toast.error('Usuário não encontrado. Verifique o nome digitado.');
+      } else if (msg.includes('Senha incorreta') || msg.includes('Invalid login')) {
+        toast.error('Senha incorreta. Tente novamente.');
+      } else {
+        toast.error('Erro ao entrar. Verifique seus dados e tente novamente.');
+      }
     } else {
       if (remember) {
         localStorage.setItem('saved_user', nome);
