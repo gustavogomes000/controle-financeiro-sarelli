@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, RefreshCw, HelpCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, HelpCircle, ImageIcon, Camera, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import AppLayout from '@/components/AppLayout';
 import UserSelect from '@/components/UserSelect';
