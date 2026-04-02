@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { pdfjs, Document, Page } from 'react-pdf';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -18,6 +19,8 @@ import AppLayout from '@/components/AppLayout';
 import UserSelect from '@/components/UserSelect';
 import FileUpload from '@/components/FileUpload';
 import { gerarPdfConta } from '@/lib/gerarPdfConta';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 const STEPS = [
   { key: 'Lancada', label: 'Registrada', emoji: '📝' },
@@ -61,8 +64,10 @@ export default function ContaDetalhePage() {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerType, setViewerType] = useState<'image' | 'pdf' | null>(null);
   const [viewerBlobUrl, setViewerBlobUrl] = useState<string | null>(null);
+  const [viewerPdfData, setViewerPdfData] = useState<Uint8Array | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
+  const [viewerPdfPages, setViewerPdfPages] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
   const viewerBlobRef = useRef<string | null>(null);
@@ -236,6 +241,8 @@ export default function ContaDetalhePage() {
       viewerBlobRef.current = null;
     }
     setViewerBlobUrl(null);
+    setViewerPdfData(null);
+    setViewerPdfPages(0);
   };
 
   const closeViewer = () => {
@@ -247,10 +254,10 @@ export default function ContaDetalhePage() {
   };
 
   const openViewer = async (url: string) => {
-    const fileType = isPdfFile(url) ? 'pdf' : 'image';
+    const initialType = isPdfFile(url) ? 'pdf' : 'image';
 
     setViewerUrl(url);
-    setViewerType(fileType);
+    setViewerType(initialType);
     setViewerError(null);
     setViewerLoading(true);
     clearViewerBlob();
@@ -271,18 +278,26 @@ export default function ContaDetalhePage() {
         blob = await response.blob();
       }
 
+      const detectedType = blob.type.includes('pdf') ? 'pdf' : 'image';
+      setViewerType(detectedType);
+
       const finalBlob =
-        fileType === 'pdf' && blob.type !== 'application/pdf'
+        detectedType === 'pdf' && blob.type !== 'application/pdf'
           ? new Blob([blob], { type: 'application/pdf' })
           : blob;
 
-      const objectUrl = URL.createObjectURL(finalBlob);
-      viewerBlobRef.current = objectUrl;
-      setViewerBlobUrl(objectUrl);
+      if (detectedType === 'pdf') {
+        const pdfBytes = new Uint8Array(await finalBlob.arrayBuffer());
+        setViewerPdfData(pdfBytes);
+      } else {
+        const objectUrl = URL.createObjectURL(finalBlob);
+        viewerBlobRef.current = objectUrl;
+        setViewerBlobUrl(objectUrl);
+      }
     } catch (err) {
       console.error('Viewer error:', err);
       setViewerError(
-        fileType === 'pdf'
+        initialType === 'pdf'
           ? 'Não foi possível abrir este PDF dentro do aplicativo.'
           : 'Não foi possível carregar a imagem.'
       );
@@ -843,16 +858,31 @@ export default function ContaDetalhePage() {
                 <p className="text-sm font-medium">{viewerError}</p>
                 <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
               </div>
+            ) : viewerType === 'pdf' && viewerPdfData ? (
+              <div className="w-full max-w-4xl mx-auto rounded-lg overflow-auto bg-white p-2">
+                <Document
+                  file={{ data: viewerPdfData }}
+                  loading={<div className="p-6 text-center text-muted-foreground">Abrindo PDF...</div>}
+                  onLoadSuccess={({ numPages }) => setViewerPdfPages(numPages)}
+                  onLoadError={(error) => {
+                    console.error('PDF render error:', error);
+                    setViewerError('Não foi possível renderizar este PDF.');
+                  }}
+                >
+                  {Array.from({ length: viewerPdfPages }, (_, index) => (
+                    <div key={index} className="mb-3 flex justify-center">
+                      <Page
+                        pageNumber={index + 1}
+                        width={Math.min(window.innerWidth - 48, 900)}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                      />
+                    </div>
+                  ))}
+                </Document>
+              </div>
             ) : viewerBlobUrl ? (
-              viewerType === 'pdf' ? (
-                <div className="w-full max-w-5xl mx-auto rounded-lg overflow-hidden bg-white p-2">
-                  <iframe
-                    src={viewerBlobUrl}
-                    title="Visualizador de PDF"
-                    className="w-full h-[80vh] rounded-md bg-white"
-                  />
-                </div>
-              ) : (
+              viewerType === 'pdf' ? null : (
                 <img
                   src={viewerBlobUrl}
                   alt="Documento"
