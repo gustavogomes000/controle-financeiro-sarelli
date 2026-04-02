@@ -85,7 +85,7 @@ export default function FileUpload({ contaId, currentUrl, onUploaded }: Props) {
             rel="noopener noreferrer"
             className="text-sm text-primary underline truncate flex-1"
           >
-            {isImage ? 'Ver comprovante em tamanho completo →' : 'Abrir comprovante (PDF) →'}
+            {isImage ? 'Ver boleto/conta em tamanho completo →' : 'Abrir boleto/conta (PDF) →'}
           </a>
         </div>
         <button
