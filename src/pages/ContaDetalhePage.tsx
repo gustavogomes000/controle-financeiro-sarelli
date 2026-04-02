@@ -279,6 +279,55 @@ export default function ContaDetalhePage() {
     }
   };
 
+  const clearViewerBlob = () => {
+    if (viewerBlobRef.current) {
+      URL.revokeObjectURL(viewerBlobRef.current);
+      viewerBlobRef.current = null;
+    }
+    setViewerBlobUrl(null);
+  };
+
+  const closeViewer = () => {
+    setViewerUrl(null);
+    setViewerType(null);
+    setViewerLoading(false);
+    setViewerError(null);
+    clearViewerBlob();
+  };
+
+  const openViewer = async (url: string) => {
+    const fileType = isPdfFile(url) ? 'pdf' : 'image';
+
+    setViewerUrl(url);
+    setViewerType(fileType);
+    setViewerError(null);
+
+    if (fileType === 'image') {
+      setViewerLoading(false);
+      clearViewerBlob();
+      return;
+    }
+
+    setViewerLoading(true);
+    clearViewerBlob();
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Falha ao baixar PDF');
+
+      const blob = await response.blob();
+      const pdfBlob = blob.type === 'application/pdf' ? blob : new Blob([blob], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(pdfBlob);
+
+      viewerBlobRef.current = objectUrl;
+      setViewerBlobUrl(objectUrl);
+    } catch {
+      setViewerError('Não foi possível abrir este PDF dentro do aplicativo.');
+    } finally {
+      setViewerLoading(false);
+    }
+  };
+
   // [FEATURE 10] Labels de log melhorados
   const getLogLabel = (log: LogEntry) => {
     if (log.acao === 'CRIADA') return '📝 Conta registrada';
@@ -537,9 +586,9 @@ export default function ContaDetalhePage() {
             {conta.comprovante_url ? (
               <>
                 {/* Preview clicável (imagens) */}
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
+                {isImageFile(conta.comprovante_url) && (
                   <button
-                    onClick={() => setViewerUrl(conta.comprovante_url)}
+                    onClick={() => void openViewer(conta.comprovante_url)}
                     className="w-full rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform"
                   >
                     <img
@@ -552,24 +601,22 @@ export default function ContaDetalhePage() {
                 )}
 
                 {/* Botão único para ver documento */}
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
+                {isImageFile(conta.comprovante_url) ? (
                   <button
-                    onClick={() => setViewerUrl(conta.comprovante_url)}
+                    onClick={() => void openViewer(conta.comprovante_url)}
                     className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
                   >
                     <Maximize2 size={16} />
                     Ver em tela cheia
                   </button>
                 ) : (
-                  <a
-                    href={conta.comprovante_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => void openViewer(conta.comprovante_url)}
                     className="w-full h-14 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
                   >
                     <Eye size={18} />
-                    Abrir boleto / conta (PDF)
-                  </a>
+                    Abrir boleto / conta
+                  </button>
                 )}
 
                 {/* Trocar documento */}
@@ -725,10 +772,10 @@ export default function ContaDetalhePage() {
             </p>
             {conta.comprovante_url ? (
               <>
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
+                {isImageFile(conta.comprovante_url) ? (
                   <>
                     <button
-                      onClick={() => setViewerUrl(conta.comprovante_url)}
+                      onClick={() => void openViewer(conta.comprovante_url)}
                       className="w-full rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform"
                     >
                       <img
@@ -739,21 +786,19 @@ export default function ContaDetalhePage() {
                       />
                     </button>
                     <button
-                      onClick={() => setViewerUrl(conta.comprovante_url)}
+                      onClick={() => void openViewer(conta.comprovante_url)}
                       className="w-full h-11 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center gap-2 text-sm font-semibold text-green-700 active:scale-[0.98] transition-transform"
                     >
                       <Eye size={16} /> Ver comprovante
                     </button>
                   </>
                 ) : (
-                  <a
-                    href={conta.comprovante_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => void openViewer(conta.comprovante_url)}
                     className="w-full h-11 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center gap-2 text-sm font-semibold text-green-700 active:scale-[0.98] transition-transform"
                   >
-                    <Eye size={16} /> Ver comprovante (PDF)
-                  </a>
+                    <Eye size={16} /> Ver comprovante
+                  </button>
                 )}
                 <FileUpload
                   contaId={conta.id}
@@ -809,13 +854,15 @@ export default function ContaDetalhePage() {
       {viewerUrl && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
-          onClick={() => setViewerUrl(null)}
+          onClick={closeViewer}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 shrink-0">
-            <span className="text-white/70 text-sm font-medium">Visualizando documento</span>
+            <span className="text-white/70 text-sm font-medium">
+              {viewerType === 'pdf' ? 'Visualizando PDF' : 'Visualizando imagem'}
+            </span>
             <button
-              onClick={() => setViewerUrl(null)}
+              onClick={closeViewer}
               className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
             >
               <X size={20} />
@@ -824,12 +871,32 @@ export default function ContaDetalhePage() {
 
           {/* Content */}
           <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
-            <img
-              src={viewerUrl}
-              alt="Documento"
-              className="max-w-full max-h-full object-contain rounded-lg"
-              style={{ touchAction: 'pinch-zoom' }}
-            />
+            {viewerType === 'pdf' ? (
+              viewerLoading ? (
+                <div className="text-center space-y-2 text-white/80">
+                  <p className="text-sm font-medium">Abrindo PDF...</p>
+                  <p className="text-xs text-white/60">Carregando o documento dentro do app.</p>
+                </div>
+              ) : viewerError ? (
+                <div className="text-center space-y-2 text-white/80 max-w-sm">
+                  <p className="text-sm font-medium">{viewerError}</p>
+                  <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
+                </div>
+              ) : viewerBlobUrl ? (
+                <iframe
+                  src={`${viewerBlobUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                  title="Documento PDF"
+                  className="h-full w-full rounded-lg bg-background"
+                />
+              ) : null
+            ) : (
+              <img
+                src={viewerUrl}
+                alt="Documento"
+                className="max-w-full max-h-full object-contain rounded-lg"
+                style={{ touchAction: 'pinch-zoom' }}
+              />
+            )}
           </div>
         </div>
       )}
