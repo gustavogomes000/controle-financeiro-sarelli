@@ -54,6 +54,7 @@ export default function ContaDetalhePage() {
   const [loading, setLoading] = useState(true);
   const [formaPagamento, setFormaPagamento] = useState('');
   const [chavePix, setChavePix] = useState('');
+  const [codigoBoleto, setCodigoBoleto] = useState('');
   const [pagoPor, setPagoPor] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
