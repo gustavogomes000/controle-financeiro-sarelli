@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Check, X, CreditCard, Paperclip, History,
-  Download, RefreshCw, User, Pencil, Save, Eye, Upload, FileText
+  Download, RefreshCw, User, Pencil, Save, Eye, Upload, FileText, Maximize2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
