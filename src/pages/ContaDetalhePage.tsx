@@ -247,6 +247,7 @@ export default function ContaDetalhePage() {
     setViewerType(null);
     setViewerLoading(false);
     setViewerError(null);
+    setViewerPdfPages(0);
     clearViewerBlob();
   };
 
