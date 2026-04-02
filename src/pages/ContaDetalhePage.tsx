@@ -471,103 +471,38 @@ export default function ContaDetalhePage() {
             {conta.comprovante_url ? (
               <>
                 {/* Preview da imagem */}
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
-                  <div className="rounded-xl overflow-hidden border border-border">
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
+                  <a href={conta.comprovante_url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform">
                     <img
                       src={conta.comprovante_url}
                       alt="Boleto/Conta"
-                      className="w-full max-h-56 object-contain bg-muted/30"
+                      className="w-full max-h-64 object-contain bg-muted/30"
                       loading="lazy"
                     />
-                  </div>
-                )}
-
-                {/* Botão abrir */}
-                <a
-                  href={conta.comprovante_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center gap-2 text-sm font-semibold text-blue-700 active:scale-[0.98] transition-transform"
-                >
-                  <Eye size={16} />
-                  Abrir em tela cheia
-                </a>
-
-                {/* Código de barras manual */}
-                <div className="space-y-1.5">
-                  <label className="label-micro">Código de barras / linha digitável</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Cole ou digite o código de barras aqui..."
-                      value={codigoBoleto}
-                      onChange={e => setCodigoBoleto(e.target.value)}
-                      className="form-input flex-1 font-mono text-xs"
-                    />
-                    {codigoBoleto && (
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(codigoBoleto);
-                          toast.success('Código copiado! Cole no app do banco.');
-                        }}
-                        className="px-4 rounded-lg bg-green-600 text-white font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0 shadow-sm"
-                      >
-                        <Copy size={14} /> Copiar
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Botão IA para tentar ler */}
-                {!extraindo && conta.comprovante_url && (
-                  <button
-                    onClick={() => extrairDadosBoleto(conta.comprovante_url)}
-                    className="w-full h-10 rounded-xl bg-purple-50 border border-purple-200 text-xs font-semibold text-purple-700 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                  </a>
+                ) : (
+                  <a
+                    href={conta.comprovante_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-14 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
                   >
-                    <Sparkles size={14} /> Tentar ler código automaticamente (IA)
-                  </button>
+                    <Eye size={18} />
+                    Abrir boleto / conta (PDF)
+                  </a>
                 )}
 
-                {/* Extraindo... */}
-                {extraindo && (
-                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-purple-50 border border-purple-200">
-                    <Loader2 size={16} className="animate-spin text-purple-600" />
-                    <div>
-                      <p className="text-xs font-semibold text-purple-700">Lendo o documento...</p>
-                      <p className="text-[10px] text-purple-600">Pode levar alguns segundos</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Dados extraídos */}
-                {!extraindo && boletoInfo && (boletoInfo.valor != null || boletoInfo.beneficiario || boletoInfo.vencimento) && (
-                  <div className="space-y-2 px-3.5 py-3 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold text-green-700 uppercase tracking-wider flex items-center gap-1">
-                        <Sparkles size={11} /> Dados extraídos
-                      </p>
-                      <p className="text-[9px] text-green-600">⚠️ Confira os dados</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {boletoInfo.valor != null && (
-                        <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
-                          <p className="text-[9px] font-bold text-green-600 uppercase">Valor</p>
-                          <p className="text-sm font-bold text-foreground">{fmt(boletoInfo.valor)}</p>
-                        </div>
-                      )}
-                      {boletoInfo.vencimento && (
-                        <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
-                          <p className="text-[9px] font-bold text-green-600 uppercase">Vencimento</p>
-                          <p className="text-sm font-bold text-foreground">{boletoInfo.vencimento}</p>
-                        </div>
-                      )}
-                    </div>
-                    {boletoInfo.beneficiario && (
-                      <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
-                        <p className="text-[9px] font-bold text-green-600 uppercase">Beneficiário</p>
-                        <p className="text-sm font-medium text-foreground">{boletoInfo.beneficiario}</p>
-                      </div>
-                    )}
-                  </div>
+                {/* Botão abrir em tela cheia (para imagens) */}
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
+                  <a
+                    href={conta.comprovante_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
+                  >
+                    <Eye size={16} />
+                    Abrir em tela cheia
+                  </a>
                 )}
 
                 {/* Trocar documento */}
@@ -599,7 +534,7 @@ export default function ContaDetalhePage() {
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Anexe o boleto ou conta para leitura automática dos dados.
+                  Anexe o boleto ou conta aqui para visualizar.
                 </p>
                 <FileUpload
                   contaId={conta.id}
