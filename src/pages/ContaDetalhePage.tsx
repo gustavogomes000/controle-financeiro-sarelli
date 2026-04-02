@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { pdfjs, Document, Page } from 'react-pdf';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -18,6 +19,8 @@ import AppLayout from '@/components/AppLayout';
 import UserSelect from '@/components/UserSelect';
 import FileUpload from '@/components/FileUpload';
 import { gerarPdfConta } from '@/lib/gerarPdfConta';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 const STEPS = [
   { key: 'Lancada', label: 'Registrada', emoji: '📝' },
