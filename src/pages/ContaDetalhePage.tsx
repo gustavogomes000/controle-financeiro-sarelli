@@ -657,23 +657,24 @@ export default function ContaDetalhePage() {
             {conta.comprovante_url ? (
               <>
                 {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
-                  <div className="rounded-xl overflow-hidden border border-border">
+                  <button
+                    onClick={() => setViewerUrl(conta.comprovante_url)}
+                    className="w-full rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform"
+                  >
                     <img
                       src={conta.comprovante_url}
                       alt="Comprovante"
                       className="w-full max-h-48 object-cover"
                       loading="lazy"
                     />
-                  </div>
+                  </button>
                 )}
-                <a
-                  href={conta.comprovante_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setViewerUrl(conta.comprovante_url)}
                   className="w-full h-11 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center gap-2 text-sm font-semibold text-green-700 active:scale-[0.98] transition-transform"
                 >
                   <Eye size={16} /> Ver comprovante
-                </a>
+                </button>
                 <FileUpload
                   contaId={conta.id}
                   currentUrl={null}
