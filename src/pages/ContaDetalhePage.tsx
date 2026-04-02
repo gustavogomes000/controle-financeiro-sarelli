@@ -252,28 +252,28 @@ export default function ContaDetalhePage() {
     setViewerUrl(url);
     setViewerType(fileType);
     setViewerError(null);
-
-    if (fileType === 'image') {
-      setViewerLoading(false);
-      clearViewerBlob();
-      return;
-    }
-
     setViewerLoading(true);
     clearViewerBlob();
 
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Falha ao baixar PDF');
+      if (!response.ok) throw new Error('Falha ao baixar arquivo');
 
       const blob = await response.blob();
-      const pdfBlob = blob.type === 'application/pdf' ? blob : new Blob([blob], { type: 'application/pdf' });
-      const objectUrl = URL.createObjectURL(pdfBlob);
+      const objectUrl = URL.createObjectURL(
+        fileType === 'pdf' && blob.type !== 'application/pdf'
+          ? new Blob([blob], { type: 'application/pdf' })
+          : blob
+      );
 
       viewerBlobRef.current = objectUrl;
       setViewerBlobUrl(objectUrl);
     } catch {
-      setViewerError('Não foi possível abrir este PDF dentro do aplicativo.');
+      setViewerError(
+        fileType === 'pdf'
+          ? 'Não foi possível abrir este PDF dentro do aplicativo.'
+          : 'Não foi possível carregar a imagem.'
+      );
     } finally {
       setViewerLoading(false);
     }
