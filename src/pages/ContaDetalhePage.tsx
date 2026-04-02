@@ -458,32 +458,110 @@ export default function ContaDetalhePage() {
           </>
         )}
 
-        {/* Boleto / Conta anexada */}
-        <div className="section-card">
-          <p className="section-title flex items-center gap-2"><Paperclip size={14} /> Boleto / Conta</p>
-          {/* Visualização rápida do anexo para quem vai pagar */}
-          {conta.comprovante_url && conta.status !== 'Paga' && (
-            <div className="mb-3 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-              <p className="text-[11px] text-blue-700 font-semibold mb-1">📄 Boleto/conta anexado — confira antes de pagar</p>
-              <a
-                href={conta.comprovante_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary underline font-medium"
+        {/* ═══════ SEÇÃO 1: BOLETO / CONTA (visualizar antes de pagar) ═══════ */}
+        {conta.status !== 'Paga' && (
+          <div className="section-card !space-y-3">
+            <p className="section-title flex items-center gap-2">
+              <FileText size={14} /> Boleto / Conta
+            </p>
+
+            {conta.comprovante_url ? (
+              <>
+                {/* Preview da imagem se for imagem */}
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <img
+                      src={conta.comprovante_url}
+                      alt="Boleto/Conta"
+                      className="w-full max-h-56 object-contain bg-muted/30"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+
+                {/* Botão grande para abrir */}
+                <a
+                  href={conta.comprovante_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center gap-2 text-sm font-semibold text-blue-700 active:scale-[0.98] transition-transform"
+                >
+                  <Eye size={16} />
+                  Abrir boleto / conta em tela cheia
+                </a>
+
+                {/* Campo para código de barras do boleto */}
+                {isAdmin && (
+                  <div className="space-y-1.5">
+                    <label className="label-micro">Código de barras do boleto (se tiver)</label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Cole ou digite o código de barras aqui..."
+                        value={codigoBoleto}
+                        onChange={e => setCodigoBoleto(e.target.value)}
+                        className="form-input flex-1 font-mono text-xs"
+                      />
+                      {codigoBoleto && (
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(codigoBoleto);
+                            toast.success('Código copiado!');
+                          }}
+                          className="h-12 px-4 rounded-xl bg-primary/10 text-primary font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
+                        >
+                          <Copy size={14} /> Copiar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Trocar boleto */}
+                <FileUpload
+                  contaId={conta.id}
+                  currentUrl={null}
+                  onUploaded={(url) => {
+                    setConta({ ...conta, comprovante_url: url });
+                  }}
+                />
+              </>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Nenhum boleto ou conta anexado ainda. Anexe para facilitar o pagamento.
+                </p>
+                <FileUpload
+                  contaId={conta.id}
+                  currentUrl={null}
+                  onUploaded={(url) => {
+                    setConta({ ...conta, comprovante_url: url });
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Código de barras copiável (quando tem e não é admin — qualquer um pode copiar) */}
+        {codigoBoleto && !isAdmin && conta.status !== 'Paga' && (
+          <div className="section-card !space-y-2">
+            <p className="label-micro">Código de barras do boleto</p>
+            <div className="flex gap-2">
+              <div className="flex-1 px-3 py-2.5 rounded-xl bg-muted/40 font-mono text-xs break-all select-all">
+                {codigoBoleto}
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(codigoBoleto);
+                  toast.success('Código copiado!');
+                }}
+                className="h-auto px-4 rounded-xl bg-primary/10 text-primary font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
               >
-                Abrir em tela cheia →
-              </a>
+                <Copy size={14} /> Copiar
+              </button>
             </div>
-          )}
-          <FileUpload
-            contaId={conta.id}
-            currentUrl={conta.comprovante_url}
-            onUploaded={(url) => {
-              setConta({ ...conta, comprovante_url: url });
-              setAvisoSemComprovante(false);
-            }}
-          />
-        </div>
+          </div>
+        )}
 
         {/* PDF */}
         {(conta.status === 'Paga' || conta.status === 'Aprovada') && (
@@ -495,12 +573,12 @@ export default function ContaDetalhePage() {
           </button>
         )}
 
-        {/* ========== AÇÕES ADMIN ========== */}
+        {/* ═══════ SEÇÃO 2: REGISTRAR PAGAMENTO (admin) ═══════ */}
         {isAdmin && (conta.status === 'Lancada' || conta.status === 'Aprovada') && !editMode && (
           <div className="section-card !space-y-4 border-primary/20">
-            <p className="section-title">💳 Registrar pagamento</p>
+            <p className="section-title flex items-center gap-2">💳 Registrar pagamento</p>
             <p className="text-[12px] text-muted-foreground">
-              Informe como e quem pagou, depois clique em confirmar.
+              Confira o boleto acima, pague, e registre aqui como foi pago.
             </p>
 
             <div className="space-y-1.5">
@@ -549,16 +627,16 @@ export default function ContaDetalhePage() {
 
             {avisoSemComprovante && !conta.comprovante_url && (
               <div className="px-4 py-3 bg-yellow-50 border border-yellow-300 rounded-xl space-y-2">
-                <p className="text-sm font-semibold text-yellow-800">⚠️ Nenhum comprovante anexado</p>
+                <p className="text-sm font-semibold text-yellow-800">⚠️ Nenhum comprovante de pagamento</p>
                 <p className="text-xs text-yellow-700">
-                  Recomendamos anexar o comprovante acima antes de confirmar. Deseja registrar mesmo assim?
+                  Recomendamos anexar o comprovante depois. Deseja registrar assim mesmo?
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setAvisoSemComprovante(false)}
                     className="flex-1 h-9 rounded-xl border border-yellow-400 text-yellow-800 text-xs font-semibold"
                   >
-                    Voltar e anexar
+                    Cancelar
                   </button>
                   <button
                     onClick={() => changeStatus('Paga')}
@@ -589,13 +667,53 @@ export default function ContaDetalhePage() {
           </div>
         )}
 
-        {/* Após pagar — lembrete de comprovante */}
-        {conta.status === 'Paga' && !conta.comprovante_url && (
-          <div className="section-card !p-3 flex items-center gap-3 bg-yellow-50 border-yellow-200 !space-y-0">
-            <Paperclip size={18} className="text-yellow-600 shrink-0" />
-            <p className="text-[12px] text-yellow-700 font-medium">
-              Não esqueça de anexar o comprovante! Role até a seção acima.
+        {/* ═══════ SEÇÃO 3: COMPROVANTE DE PAGAMENTO (após pagar) ═══════ */}
+        {conta.status === 'Paga' && (
+          <div className="section-card !space-y-3">
+            <p className="section-title flex items-center gap-2">
+              <Paperclip size={14} /> Comprovante de pagamento
             </p>
+            {conta.comprovante_url ? (
+              <>
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <img
+                      src={conta.comprovante_url}
+                      alt="Comprovante"
+                      className="w-full max-h-48 object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <a
+                  href={conta.comprovante_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full h-11 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center gap-2 text-sm font-semibold text-green-700 active:scale-[0.98] transition-transform"
+                >
+                  <Eye size={16} /> Ver comprovante
+                </a>
+                <FileUpload
+                  contaId={conta.id}
+                  currentUrl={null}
+                  onUploaded={(url) => setConta({ ...conta, comprovante_url: url })}
+                />
+              </>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-3 py-2.5 bg-yellow-50 border border-yellow-200 rounded-xl">
+                  <Upload size={14} className="text-yellow-600 shrink-0" />
+                  <p className="text-xs text-yellow-700 font-medium">
+                    Anexe o comprovante de pagamento aqui
+                  </p>
+                </div>
+                <FileUpload
+                  contaId={conta.id}
+                  currentUrl={null}
+                  onUploaded={(url) => setConta({ ...conta, comprovante_url: url })}
+                />
+              </div>
+            )}
           </div>
         )}
 
