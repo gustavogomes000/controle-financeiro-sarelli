@@ -759,20 +759,12 @@ export default function ContaDetalhePage() {
 
           {/* Content */}
           <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
-            {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(viewerUrl) ? (
-              <img
-                src={viewerUrl}
-                alt="Documento"
-                className="max-w-full max-h-full object-contain rounded-lg"
-                style={{ touchAction: 'pinch-zoom' }}
-              />
-            ) : (
-              <iframe
-                src={viewerUrl}
-                className="w-full h-full rounded-lg bg-white"
-                title="Visualizar PDF"
-              />
-            )}
+            <img
+              src={viewerUrl}
+              alt="Documento"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              style={{ touchAction: 'pinch-zoom' }}
+            />
           </div>
         </div>
       )}
