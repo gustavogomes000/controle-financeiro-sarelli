@@ -471,40 +471,37 @@ export default function ContaDetalhePage() {
 
             {conta.comprovante_url ? (
               <>
-                {/* Preview da imagem */}
+                {/* Preview clicável */}
                 {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
-                  <a href={conta.comprovante_url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform">
+                  <button
+                    onClick={() => setViewerUrl(conta.comprovante_url)}
+                    className="w-full rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform"
+                  >
                     <img
                       src={conta.comprovante_url}
                       alt="Boleto/Conta"
                       className="w-full max-h-64 object-contain bg-muted/30"
                       loading="lazy"
                     />
-                  </a>
+                  </button>
                 ) : (
-                  <a
-                    href={conta.comprovante_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => setViewerUrl(conta.comprovante_url)}
                     className="w-full h-14 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
                   >
                     <Eye size={18} />
                     Abrir boleto / conta (PDF)
-                  </a>
+                  </button>
                 )}
 
-                {/* Botão abrir em tela cheia (para imagens) */}
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
-                  <a
-                    href={conta.comprovante_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
-                  >
-                    <Eye size={16} />
-                    Abrir em tela cheia
-                  </a>
-                )}
+                {/* Botão ver maior */}
+                <button
+                  onClick={() => setViewerUrl(conta.comprovante_url)}
+                  className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
+                >
+                  <Maximize2 size={16} />
+                  Ver em tela cheia
+                </button>
 
                 {/* Trocar documento */}
                 <button
