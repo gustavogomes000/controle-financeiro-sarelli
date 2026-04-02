@@ -501,7 +501,7 @@ export default function ContaDetalhePage() {
 
             {conta.comprovante_url ? (
               <>
-                {/* Preview da imagem se for imagem */}
+                {/* Preview da imagem */}
                 {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
                   <div className="rounded-xl overflow-hidden border border-border">
                     <img
@@ -513,7 +513,7 @@ export default function ContaDetalhePage() {
                   </div>
                 )}
 
-                {/* Botão grande para abrir */}
+                {/* Botão abrir */}
                 <a
                   href={conta.comprovante_url}
                   target="_blank"
@@ -521,79 +521,139 @@ export default function ContaDetalhePage() {
                   className="w-full h-12 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center gap-2 text-sm font-semibold text-blue-700 active:scale-[0.98] transition-transform"
                 >
                   <Eye size={16} />
-                  Abrir boleto / conta em tela cheia
+                  Abrir em tela cheia
                 </a>
 
-                {/* Campo para código de barras do boleto */}
-                {isAdmin && (
-                  <div className="space-y-1.5">
-                    <label className="label-micro">Código de barras do boleto (se tiver)</label>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Cole ou digite o código de barras aqui..."
-                        value={codigoBoleto}
-                        onChange={e => setCodigoBoleto(e.target.value)}
-                        className="form-input flex-1 font-mono text-xs"
-                      />
-                      {codigoBoleto && (
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(codigoBoleto);
-                            toast.success('Código copiado!');
-                          }}
-                          className="h-12 px-4 rounded-xl bg-primary/10 text-primary font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
-                        >
-                          <Copy size={14} /> Copiar
-                        </button>
-                      )}
+                {/* Extraindo... */}
+                {extraindo && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-purple-50 border border-purple-200">
+                    <Loader2 size={16} className="animate-spin text-purple-600" />
+                    <div>
+                      <p className="text-xs font-semibold text-purple-700">Lendo o documento...</p>
+                      <p className="text-[10px] text-purple-600">Extraindo código de barras e dados automaticamente</p>
                     </div>
                   </div>
                 )}
 
-                {/* Trocar boleto */}
-                <FileUpload
-                  contaId={conta.id}
-                  currentUrl={null}
-                  onUploaded={(url) => {
-                    setConta({ ...conta, comprovante_url: url });
-                  }}
-                />
+                {/* Dados extraídos do boleto */}
+                {!extraindo && (codigoBoleto || boletoInfo?.valor || boletoInfo?.beneficiario) && (
+                  <div className="space-y-2.5 px-3.5 py-3 rounded-xl bg-green-50 border border-green-200">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-green-600" />
+                      <p className="text-[11px] font-bold text-green-700 uppercase tracking-wider">Dados extraídos automaticamente</p>
+                    </div>
+
+                    {/* Código de barras */}
+                    {codigoBoleto && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-semibold text-green-700 uppercase">Código de barras</p>
+                        <div className="flex gap-2">
+                          <div className="flex-1 px-3 py-2.5 rounded-lg bg-white font-mono text-[13px] break-all select-all border border-green-200 leading-relaxed">
+                            {codigoBoleto}
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(codigoBoleto);
+                              toast.success('Código copiado! Cole no app do banco para pagar.');
+                            }}
+                            className="px-4 rounded-lg bg-green-600 text-white font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0 shadow-sm"
+                          >
+                            <Copy size={14} /> Copiar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Info grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {boletoInfo?.valor != null && (
+                        <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
+                          <p className="text-[9px] font-bold text-green-600 uppercase">Valor</p>
+                          <p className="text-sm font-bold text-foreground">
+                            {fmt(boletoInfo.valor)}
+                          </p>
+                        </div>
+                      )}
+                      {boletoInfo?.vencimento && (
+                        <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
+                          <p className="text-[9px] font-bold text-green-600 uppercase">Vencimento</p>
+                          <p className="text-sm font-bold text-foreground">{boletoInfo.vencimento}</p>
+                        </div>
+                      )}
+                    </div>
+                    {boletoInfo?.beneficiario && (
+                      <div className="px-3 py-2 rounded-lg bg-white border border-green-200">
+                        <p className="text-[9px] font-bold text-green-600 uppercase">Beneficiário</p>
+                        <p className="text-sm font-medium text-foreground">{boletoInfo.beneficiario}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Edição manual do código */}
+                {!extraindo && !codigoBoleto && (
+                  <div className="space-y-1.5">
+                    <label className="label-micro">Código de barras (cole manualmente se não foi extraído)</label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Cole o código de barras aqui..."
+                        value={codigoBoleto}
+                        onChange={e => setCodigoBoleto(e.target.value)}
+                        className="form-input flex-1 font-mono text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Re-extrair / trocar */}
+                <div className="flex gap-2">
+                  {!extraindo && conta.comprovante_url && (
+                    <button
+                      onClick={() => extrairDadosBoleto(conta.comprovante_url)}
+                      className="flex-1 h-10 rounded-xl border border-dashed border-border text-xs text-muted-foreground flex items-center justify-center gap-1.5 hover:border-primary/40 transition-colors"
+                    >
+                      <Sparkles size={12} /> Ler novamente
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      // Reset and show upload
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*,.pdf';
+                      input.onchange = async (e: any) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 10 * 1024 * 1024) { toast.error('Máx. 10MB'); return; }
+                        const ext = file.name.split('.').pop() || 'jpg';
+                        const path = `${conta.id}/${Date.now()}.${ext}`;
+                        const { error } = await supabase.storage.from('comprovantes').upload(path, file, { upsert: true });
+                        if (error) { toast.error('Erro ao enviar'); return; }
+                        const { data: urlData } = supabase.storage.from('comprovantes').getPublicUrl(path);
+                        await supabase.from('contas_pagar').update({ comprovante_url: urlData.publicUrl }).eq('id', conta.id);
+                        handleBoletoUploaded(urlData.publicUrl);
+                        toast.success('Boleto substituído!');
+                      };
+                      input.click();
+                    }}
+                    className="flex-1 h-10 rounded-xl border border-dashed border-border text-xs text-muted-foreground flex items-center justify-center gap-1.5 hover:border-primary/40 transition-colors"
+                  >
+                    <Upload size={12} /> Trocar documento
+                  </button>
+                </div>
               </>
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Nenhum boleto ou conta anexado ainda. Anexe para facilitar o pagamento.
+                  Anexe o boleto ou conta para leitura automática dos dados.
                 </p>
                 <FileUpload
                   contaId={conta.id}
                   currentUrl={null}
-                  onUploaded={(url) => {
-                    setConta({ ...conta, comprovante_url: url });
-                  }}
+                  onUploaded={handleBoletoUploaded}
                 />
               </div>
             )}
-          </div>
-        )}
-
-        {/* Código de barras copiável (quando tem e não é admin — qualquer um pode copiar) */}
-        {codigoBoleto && !isAdmin && conta.status !== 'Paga' && (
-          <div className="section-card !space-y-2">
-            <p className="label-micro">Código de barras do boleto</p>
-            <div className="flex gap-2">
-              <div className="flex-1 px-3 py-2.5 rounded-xl bg-muted/40 font-mono text-xs break-all select-all">
-                {codigoBoleto}
-              </div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(codigoBoleto);
-                  toast.success('Código copiado!');
-                }}
-                className="h-auto px-4 rounded-xl bg-primary/10 text-primary font-semibold text-xs flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
-              >
-                <Copy size={14} /> Copiar
-              </button>
-            </div>
           </div>
         )}
 
