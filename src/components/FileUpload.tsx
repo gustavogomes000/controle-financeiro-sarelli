@@ -85,14 +85,14 @@ export default function FileUpload({ contaId, currentUrl, onUploaded }: Props) {
             rel="noopener noreferrer"
             className="text-sm text-primary underline truncate flex-1"
           >
-            {isImage ? 'Ver comprovante em tamanho completo →' : 'Abrir comprovante (PDF) →'}
+            {isImage ? 'Ver boleto/conta em tamanho completo →' : 'Abrir boleto/conta (PDF) →'}
           </a>
         </div>
         <button
           onClick={() => inputGaleriaRef.current?.click()}
           className="w-full h-10 rounded-xl border border-dashed border-border text-xs text-muted-foreground flex items-center justify-center gap-2 hover:border-primary/40 transition-colors"
         >
-          <Upload size={14} /> Substituir comprovante
+          <Upload size={14} /> Substituir boleto/conta
         </button>
         <input ref={inputGaleriaRef} type="file" accept="image/*,.pdf" onChange={handleUpload} className="hidden" />
       </div>
