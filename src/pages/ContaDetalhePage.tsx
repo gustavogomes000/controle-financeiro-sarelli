@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { pdfjs, Document, Page } from 'react-pdf';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -19,8 +18,6 @@ import AppLayout from '@/components/AppLayout';
 import UserSelect from '@/components/UserSelect';
 import FileUpload from '@/components/FileUpload';
 import { gerarPdfConta } from '@/lib/gerarPdfConta';
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 const STEPS = [
   { key: 'Lancada', label: 'Registrada', emoji: '📝' },
@@ -66,7 +63,6 @@ export default function ContaDetalhePage() {
   const [viewerBlobUrl, setViewerBlobUrl] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
-  const [viewerPdfPages, setViewerPdfPages] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
   const viewerBlobRef = useRef<string | null>(null);
@@ -247,7 +243,6 @@ export default function ContaDetalhePage() {
     setViewerType(null);
     setViewerLoading(false);
     setViewerError(null);
-    setViewerPdfPages(0);
     clearViewerBlob();
   };
 
@@ -850,24 +845,12 @@ export default function ContaDetalhePage() {
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-auto bg-white p-2">
-                  <Document
-                    file={viewerBlobUrl}
-                    loading={<div className="p-6 text-center text-muted-foreground">Abrindo PDF...</div>}
-                    onLoadSuccess={({ numPages }) => setViewerPdfPages(numPages)}
-                    onLoadError={() => setViewerError('Não foi possível renderizar este PDF.')}
-                  >
-                    {Array.from({ length: viewerPdfPages }, (_, index) => (
-                      <div key={index} className="mb-3 flex justify-center">
-                        <Page
-                          pageNumber={index + 1}
-                          width={Math.min(window.innerWidth - 48, 900)}
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </div>
-                    ))}
-                  </Document>
+                <div className="w-full max-w-5xl mx-auto rounded-lg overflow-hidden bg-white p-2">
+                  <iframe
+                    src={viewerBlobUrl}
+                    title="Visualizador de PDF"
+                    className="w-full h-[80vh] rounded-md bg-white"
+                  />
                 </div>
               ) : (
                 <img
