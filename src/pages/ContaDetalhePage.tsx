@@ -256,19 +256,31 @@ export default function ContaDetalhePage() {
     clearViewerBlob();
 
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Falha ao baixar arquivo');
+      // Try to extract bucket/path from Supabase Storage URL
+      const storageMatch = url.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/?]+)\/(.+?)(?:\?|$)/);
 
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(
+      let blob: Blob;
+      if (storageMatch) {
+        const [, bucket, path] = storageMatch;
+        const { data, error } = await supabase.storage.from(bucket).download(decodeURIComponent(path));
+        if (error || !data) throw new Error(error?.message || 'Falha ao baixar');
+        blob = data;
+      } else {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error('Falha ao baixar arquivo');
+        blob = await response.blob();
+      }
+
+      const finalBlob =
         fileType === 'pdf' && blob.type !== 'application/pdf'
           ? new Blob([blob], { type: 'application/pdf' })
-          : blob
-      );
+          : blob;
 
+      const objectUrl = URL.createObjectURL(finalBlob);
       viewerBlobRef.current = objectUrl;
       setViewerBlobUrl(objectUrl);
-    } catch {
+    } catch (err) {
+      console.error('Viewer error:', err);
       setViewerError(
         fileType === 'pdf'
           ? 'Não foi possível abrir este PDF dentro do aplicativo.'
