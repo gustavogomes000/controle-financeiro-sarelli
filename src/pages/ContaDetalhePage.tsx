@@ -457,15 +457,29 @@ export default function ContaDetalhePage() {
           </>
         )}
 
-        {/* Comprovante */}
+        {/* Comprovante / Anexo da conta */}
         <div className="section-card">
-          <p className="section-title flex items-center gap-2"><Paperclip size={14} /> Comprovante</p>
+          <p className="section-title flex items-center gap-2"><Paperclip size={14} /> Comprovante / Anexo</p>
+          {/* Visualização rápida do anexo para quem vai pagar */}
+          {conta.comprovante_url && conta.status !== 'Paga' && (
+            <div className="mb-3 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
+              <p className="text-[11px] text-blue-700 font-semibold mb-1">📄 Documento anexado — confira antes de pagar</p>
+              <a
+                href={conta.comprovante_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary underline font-medium"
+              >
+                Abrir documento em tela cheia →
+              </a>
+            </div>
+          )}
           <FileUpload
             contaId={conta.id}
             currentUrl={conta.comprovante_url}
             onUploaded={(url) => {
               setConta({ ...conta, comprovante_url: url });
-              setAvisoSemComprovante(false); // Comprovante enviado — limpa aviso
+              setAvisoSemComprovante(false);
             }}
           />
         </div>
