@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,6 +45,9 @@ interface UsuarioSimples { id: string; nome: string; }
 const parseBRL = (s: string) =>
   parseFloat(s.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, ''));
 
+const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(url);
+const isPdfFile = (url: string) => /\.pdf(\?|$)/i.test(url);
+
 export default function ContaDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -56,8 +59,13 @@ export default function ContaDetalhePage() {
   const [chavePix, setChavePix] = useState('');
   const [pagoPor, setPagoPor] = useState('');
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerType, setViewerType] = useState<'image' | 'pdf' | null>(null);
+  const [viewerBlobUrl, setViewerBlobUrl] = useState<string | null>(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const [viewerError, setViewerError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
+  const viewerBlobRef = useRef<string | null>(null);
 
   // [FEATURE 4] Aviso de comprovante antes de confirmar pagamento
   const [avisoSemComprovante, setAvisoSemComprovante] = useState(false);
@@ -82,6 +90,14 @@ export default function ContaDetalhePage() {
       setFormaPagamento(prev => prev || 'PIX');
     }
   }, [conta?.id]);
+
+  useEffect(() => {
+    return () => {
+      if (viewerBlobRef.current) {
+        URL.revokeObjectURL(viewerBlobRef.current);
+      }
+    };
+  }, []);
 
   const fetchUsuarios = async () => {
     const { data } = await supabase.from('usuarios').select('id, nome').order('nome');
@@ -212,6 +228,55 @@ export default function ContaDetalhePage() {
       aprovado_por_nome: getNome(conta.aprovado_por) ?? undefined,
       pago_por_nome: getNome(conta.pago_por) ?? undefined,
     });
+  };
+
+  const clearViewerBlob = () => {
+    if (viewerBlobRef.current) {
+      URL.revokeObjectURL(viewerBlobRef.current);
+      viewerBlobRef.current = null;
+    }
+    setViewerBlobUrl(null);
+  };
+
+  const closeViewer = () => {
+    setViewerUrl(null);
+    setViewerType(null);
+    setViewerLoading(false);
+    setViewerError(null);
+    clearViewerBlob();
+  };
+
+  const openViewer = async (url: string) => {
+    const fileType = isPdfFile(url) ? 'pdf' : 'image';
+
+    setViewerUrl(url);
+    setViewerType(fileType);
+    setViewerError(null);
+
+    if (fileType === 'image') {
+      setViewerLoading(false);
+      clearViewerBlob();
+      return;
+    }
+
+    setViewerLoading(true);
+    clearViewerBlob();
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Falha ao baixar PDF');
+
+      const blob = await response.blob();
+      const pdfBlob = blob.type === 'application/pdf' ? blob : new Blob([blob], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(pdfBlob);
+
+      viewerBlobRef.current = objectUrl;
+      setViewerBlobUrl(objectUrl);
+    } catch {
+      setViewerError('Não foi possível abrir este PDF dentro do aplicativo.');
+    } finally {
+      setViewerLoading(false);
+    }
   };
 
   // [FEATURE 10] Labels de log melhorados
