@@ -471,8 +471,8 @@ export default function ContaDetalhePage() {
 
             {conta.comprovante_url ? (
               <>
-                {/* Preview clicável */}
-                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
+                {/* Preview clicável (imagens) */}
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) && (
                   <button
                     onClick={() => setViewerUrl(conta.comprovante_url)}
                     className="w-full rounded-xl overflow-hidden border border-border active:scale-[0.98] transition-transform"
@@ -484,24 +484,28 @@ export default function ContaDetalhePage() {
                       loading="lazy"
                     />
                   </button>
-                ) : (
+                )}
+
+                {/* Botão único para ver documento */}
+                {/\.(jpg|jpeg|png|gif|webp|heic)(\?|$)/i.test(conta.comprovante_url) ? (
                   <button
                     onClick={() => setViewerUrl(conta.comprovante_url)}
+                    className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
+                  >
+                    <Maximize2 size={16} />
+                    Ver em tela cheia
+                  </button>
+                ) : (
+                  <a
+                    href={conta.comprovante_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-full h-14 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
                   >
                     <Eye size={18} />
                     Abrir boleto / conta (PDF)
-                  </button>
+                  </a>
                 )}
-
-                {/* Botão ver maior */}
-                <button
-                  onClick={() => setViewerUrl(conta.comprovante_url)}
-                  className="w-full h-11 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-center gap-2 text-sm font-semibold text-primary active:scale-[0.98] transition-transform"
-                >
-                  <Maximize2 size={16} />
-                  Ver em tela cheia
-                </button>
 
                 {/* Trocar documento */}
                 <button
