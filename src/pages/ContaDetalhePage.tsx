@@ -850,11 +850,25 @@ export default function ContaDetalhePage() {
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <iframe
-                  src={`${viewerBlobUrl}#toolbar=0&navpanes=0&scrollbar=1`}
-                  title="Documento PDF"
-                  className="h-full w-full rounded-lg bg-background"
-                />
+                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-auto bg-white p-2">
+                  <Document
+                    file={viewerBlobUrl}
+                    loading={<div className="p-6 text-center text-muted-foreground">Abrindo PDF...</div>}
+                    onLoadSuccess={({ numPages }) => setViewerPdfPages(numPages)}
+                    onLoadError={() => setViewerError('Não foi possível renderizar este PDF.')}
+                  >
+                    {Array.from({ length: viewerPdfPages }, (_, index) => (
+                      <div key={index} className="mb-3 flex justify-center">
+                        <Page
+                          pageNumber={index + 1}
+                          width={Math.min(window.innerWidth - 48, 900)}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
+                      </div>
+                    ))}
+                  </Document>
+                </div>
               ) : (
                 <img
                   src={viewerBlobUrl}
