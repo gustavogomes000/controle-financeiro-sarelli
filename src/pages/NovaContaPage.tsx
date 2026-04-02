@@ -51,6 +51,28 @@ export default function NovaContaPage() {
 
   const responsavel = criadoPor || usuario?.id || '';
 
+  const handleAnexo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Arquivo muito grande (máx. 10MB)');
+      return;
+    }
+    setAnexo(file);
+    if (file.type.startsWith('image/')) {
+      setAnexoPreview(URL.createObjectURL(file));
+    } else {
+      setAnexoPreview(null);
+    }
+  };
+
+  const removerAnexo = () => {
+    setAnexo(null);
+    setAnexoPreview(null);
+    if (inputGaleriaRef.current) inputGaleriaRef.current.value = '';
+    if (inputCameraRef.current) inputCameraRef.current.value = '';
+  };
+
   const handleValor = (raw: string) => {
     const nums = raw.replace(/\D/g, '');
     if (!nums) { setValorRaw(''); return; }
