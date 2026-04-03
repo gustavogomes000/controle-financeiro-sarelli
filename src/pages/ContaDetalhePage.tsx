@@ -851,31 +851,28 @@ export default function ContaDetalhePage() {
                 <p className="text-sm font-medium">{viewerError}</p>
                 <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
               </div>
-            ) : viewerType === 'pdf' && viewerPdfData ? (
-              <div className="w-full max-w-4xl mx-auto rounded-lg overflow-auto bg-white p-2">
-                <Document
-                  file={{ data: viewerPdfData }}
-                  loading={<div className="p-6 text-center text-muted-foreground">Abrindo PDF...</div>}
-                  onLoadSuccess={({ numPages }) => setViewerPdfPages(numPages)}
-                  onLoadError={(error) => {
-                    console.error('PDF render error:', error);
-                    setViewerError('Não foi possível renderizar este PDF.');
-                  }}
-                >
-                  {Array.from({ length: viewerPdfPages }, (_, index) => (
-                    <div key={index} className="mb-3 flex justify-center">
-                      <Page
-                        pageNumber={index + 1}
-                        width={Math.min(window.innerWidth - 48, 900)}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                      />
-                    </div>
-                  ))}
-                </Document>
-              </div>
             ) : viewerBlobUrl ? (
-              viewerType === 'pdf' ? null : (
+              viewerType === 'pdf' ? (
+                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-2">
+                  <object
+                    data={viewerBlobUrl}
+                    type="application/pdf"
+                    className="w-full rounded-md bg-white"
+                    style={{ height: '80vh' }}
+                  >
+                    <div className="p-8 text-center space-y-4">
+                      <p className="text-muted-foreground text-sm">Seu navegador não suporta visualização de PDF embutida.</p>
+                      <a
+                        href={viewerBlobUrl}
+                        download="documento.pdf"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium"
+                      >
+                        <Download className="w-4 h-4" /> Baixar PDF
+                      </a>
+                    </div>
+                  </object>
+                </div>
+              ) : (
                 <img
                   src={viewerBlobUrl}
                   alt="Documento"
