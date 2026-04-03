@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -64,6 +65,7 @@ export default function ContaDetalhePage() {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerType, setViewerType] = useState<'image' | 'pdf' | null>(null);
   const [viewerBlobUrl, setViewerBlobUrl] = useState<string | null>(null);
+  const [pdfPageImages, setPdfPageImages] = useState<string[]>([]);
   
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
@@ -241,7 +243,32 @@ export default function ContaDetalhePage() {
       viewerBlobRef.current = null;
     }
     setViewerBlobUrl(null);
+    setPdfPageImages([]);
   };
+
+  const renderPdfToImages = useCallback(async (blob: Blob) => {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+      const arrayBuffer = await blob.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const images: string[] = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const scale = 2;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d')!;
+        await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+        images.push(canvas.toDataURL('image/png'));
+      }
+      setPdfPageImages(images);
+    } catch (err) {
+      console.error('PDF render error:', err);
+      setViewerError('Não foi possível renderizar o PDF.');
+    }
+  }, []);
 
   const closeViewer = () => {
     setViewerUrl(null);
@@ -287,6 +314,10 @@ export default function ContaDetalhePage() {
       const objectUrl = URL.createObjectURL(finalBlob);
       viewerBlobRef.current = objectUrl;
       setViewerBlobUrl(objectUrl);
+
+      if (isPdfFile(url)) {
+        await renderPdfToImages(finalBlob);
+      }
     } catch (err) {
       console.error('Viewer error:', err);
       setViewerError(
@@ -853,14 +884,20 @@ export default function ContaDetalhePage() {
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-2 flex flex-col items-center gap-4">
-                  <iframe
-                    src={viewerBlobUrl + '#toolbar=1&navpanes=0'}
-                    title="Visualizador de PDF"
-                    className="w-full rounded-md bg-white border-0"
-                    style={{ height: '80vh' }}
-                    sandbox="allow-same-origin allow-scripts allow-popups"
-                  />
+                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-4 flex flex-col items-center gap-4 max-h-[85vh] overflow-y-auto">
+                  {pdfPageImages.length > 0 ? (
+                    pdfPageImages.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`Página ${i + 1}`}
+                        className="w-full rounded-md shadow-sm"
+                        style={{ touchAction: 'pinch-zoom' }}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm py-8">Renderizando PDF...</p>
+                  )}
                   <a
                     href={viewerBlobUrl}
                     download="documento.pdf"
