@@ -856,7 +856,7 @@ export default function ContaDetalhePage() {
       {/* ═══════ LIGHTBOX / VISUALIZADOR INTERNO ═══════ */}
       {viewerUrl && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
           onClick={closeViewer}
         >
           {/* Header bar */}
