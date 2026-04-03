@@ -241,8 +241,6 @@ export default function ContaDetalhePage() {
       viewerBlobRef.current = null;
     }
     setViewerBlobUrl(null);
-    setViewerPdfData(null);
-    setViewerPdfPages(0);
   };
 
   const closeViewer = () => {
