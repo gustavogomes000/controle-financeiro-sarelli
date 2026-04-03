@@ -314,6 +314,10 @@ export default function ContaDetalhePage() {
       const objectUrl = URL.createObjectURL(finalBlob);
       viewerBlobRef.current = objectUrl;
       setViewerBlobUrl(objectUrl);
+
+      if (isPdfFile(url)) {
+        await renderPdfToImages(finalBlob);
+      }
     } catch (err) {
       console.error('Viewer error:', err);
       setViewerError(
