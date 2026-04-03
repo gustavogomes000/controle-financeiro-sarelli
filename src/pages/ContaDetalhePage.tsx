@@ -20,7 +20,7 @@ import UserSelect from '@/components/UserSelect';
 import FileUpload from '@/components/FileUpload';
 import { gerarPdfConta } from '@/lib/gerarPdfConta';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+
 
 const STEPS = [
   { key: 'Lancada', label: 'Registrada', emoji: '📝' },
