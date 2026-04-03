@@ -64,7 +64,7 @@ export default function ContaDetalhePage() {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerType, setViewerType] = useState<'image' | 'pdf' | null>(null);
   const [viewerBlobUrl, setViewerBlobUrl] = useState<string | null>(null);
-  const [viewerPdfData, setViewerPdfData] = useState<Uint8Array | null>(null);
+  
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
   const [viewerPdfPages, setViewerPdfPages] = useState(0);
