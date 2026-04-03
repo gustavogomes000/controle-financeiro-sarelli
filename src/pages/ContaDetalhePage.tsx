@@ -884,14 +884,20 @@ export default function ContaDetalhePage() {
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-2 flex flex-col items-center gap-4">
-                  <iframe
-                    src={viewerBlobUrl + '#toolbar=1&navpanes=0'}
-                    title="Visualizador de PDF"
-                    className="w-full rounded-md bg-white border-0"
-                    style={{ height: '80vh' }}
-                    sandbox="allow-same-origin allow-scripts allow-popups"
-                  />
+                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-4 flex flex-col items-center gap-4 max-h-[85vh] overflow-y-auto">
+                  {pdfPageImages.length > 0 ? (
+                    pdfPageImages.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`Página ${i + 1}`}
+                        className="w-full rounded-md shadow-sm"
+                        style={{ touchAction: 'pinch-zoom' }}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm py-8">Renderizando PDF...</p>
+                  )}
                   <a
                     href={viewerBlobUrl}
                     download="documento.pdf"
