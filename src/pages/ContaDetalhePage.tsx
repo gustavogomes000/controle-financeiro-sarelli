@@ -853,24 +853,21 @@ export default function ContaDetalhePage() {
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-2">
-                  <object
-                    data={viewerBlobUrl}
-                    type="application/pdf"
-                    className="w-full rounded-md bg-white"
+                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-2 flex flex-col items-center gap-4">
+                  <iframe
+                    src={viewerBlobUrl + '#toolbar=1&navpanes=0'}
+                    title="Visualizador de PDF"
+                    className="w-full rounded-md bg-white border-0"
                     style={{ height: '80vh' }}
+                    sandbox="allow-same-origin allow-scripts allow-popups"
+                  />
+                  <a
+                    href={viewerBlobUrl}
+                    download="documento.pdf"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium mb-2"
                   >
-                    <div className="p-8 text-center space-y-4">
-                      <p className="text-muted-foreground text-sm">Seu navegador não suporta visualização de PDF embutida.</p>
-                      <a
-                        href={viewerBlobUrl}
-                        download="documento.pdf"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium"
-                      >
-                        <Download className="w-4 h-4" /> Baixar PDF
-                      </a>
-                    </div>
-                  </object>
+                    <Download className="w-4 h-4" /> Baixar PDF
+                  </a>
                 </div>
               ) : (
                 <img
