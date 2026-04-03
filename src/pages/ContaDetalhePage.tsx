@@ -856,64 +856,82 @@ export default function ContaDetalhePage() {
       {/* ═══════ LIGHTBOX / VISUALIZADOR INTERNO ═══════ */}
       {viewerUrl && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
           onClick={closeViewer}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 shrink-0">
-            <span className="text-white/70 text-sm font-medium">
+          <div className="flex items-center justify-between px-3 py-2 shrink-0 safe-area-top">
+            <span className="text-white/70 text-xs font-medium truncate max-w-[60%]">
               {viewerType === 'pdf' ? 'Visualizando PDF' : 'Visualizando imagem'}
             </span>
-            <button
-              onClick={closeViewer}
-              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
-            >
-              <X size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              {viewerType === 'pdf' && viewerBlobUrl && (
+                <a
+                  href={viewerBlobUrl}
+                  download="documento.pdf"
+                  onClick={e => e.stopPropagation()}
+                  className="h-9 px-3 rounded-full bg-white/10 flex items-center gap-1.5 text-white text-xs font-medium active:scale-90 transition-transform"
+                >
+                  <Download size={14} /> Baixar
+                </a>
+              )}
+              <button
+                onClick={closeViewer}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
+          <div
+            className="flex-1 overflow-auto overscroll-contain px-2 pb-4"
+            onClick={e => e.stopPropagation()}
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             {viewerLoading ? (
-              <div className="text-center space-y-2 text-white/80">
-                <p className="text-sm font-medium">Carregando...</p>
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center space-y-2 text-white/80">
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                  <p className="text-sm font-medium">Carregando...</p>
+                </div>
               </div>
             ) : viewerError ? (
-              <div className="text-center space-y-2 text-white/80 max-w-sm">
-                <p className="text-sm font-medium">{viewerError}</p>
-                <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center space-y-2 text-white/80 max-w-sm">
+                  <p className="text-sm font-medium">{viewerError}</p>
+                  <p className="text-xs text-white/60">Tente reenviar o arquivo se o problema continuar.</p>
+                </div>
               </div>
             ) : viewerBlobUrl ? (
               viewerType === 'pdf' ? (
-                <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden bg-white p-4 flex flex-col items-center gap-4 max-h-[85vh] overflow-y-auto">
+                <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-2">
                   {pdfPageImages.length > 0 ? (
                     pdfPageImages.map((src, i) => (
                       <img
                         key={i}
                         src={src}
                         alt={`Página ${i + 1}`}
-                        className="w-full rounded-md shadow-sm"
+                        className="w-full rounded shadow-sm"
                         style={{ touchAction: 'pinch-zoom' }}
                       />
                     ))
                   ) : (
-                    <p className="text-muted-foreground text-sm py-8">Renderizando PDF...</p>
+                    <div className="flex items-center justify-center py-16">
+                      <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </div>
                   )}
-                  <a
-                    href={viewerBlobUrl}
-                    download="documento.pdf"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium mb-2"
-                  >
-                    <Download className="w-4 h-4" /> Baixar PDF
-                  </a>
                 </div>
               ) : (
-                <img
-                  src={viewerBlobUrl}
-                  alt="Documento"
-                  className="max-w-full max-h-full object-contain rounded-lg"
-                  style={{ touchAction: 'pinch-zoom' }}
-                />
+                <div className="flex items-center justify-center min-h-full">
+                  <img
+                    src={viewerBlobUrl}
+                    alt="Documento"
+                    className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                    style={{ touchAction: 'pinch-zoom' }}
+                  />
+                </div>
               )
             ) : null}
           </div>
