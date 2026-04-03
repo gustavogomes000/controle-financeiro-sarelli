@@ -67,7 +67,7 @@ export default function ContaDetalhePage() {
   
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
-  const [viewerPdfPages, setViewerPdfPages] = useState(0);
+  
   const [actionLoading, setActionLoading] = useState(false);
   const [usuarios, setUsuarios] = useState<UsuarioSimples[]>([]);
   const viewerBlobRef = useRef<string | null>(null);
