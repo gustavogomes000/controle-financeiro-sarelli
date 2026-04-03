@@ -859,9 +859,9 @@ export default function ContaDetalhePage() {
           className="fixed inset-0 z-50 bg-black/95 flex flex-col"
           onClick={closeViewer}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-3 py-2 shrink-0 safe-area-top">
-            <span className="text-white/70 text-xs font-medium truncate max-w-[60%]">
+          {/* Header bar */}
+          <div className="flex items-center justify-between px-3 py-2 shrink-0 bg-black/80 backdrop-blur-sm border-b border-white/10">
+            <span className="text-white/70 text-xs font-medium truncate max-w-[50%]">
               {viewerType === 'pdf' ? 'Visualizando PDF' : 'Visualizando imagem'}
             </span>
             <div className="flex items-center gap-2">
@@ -870,16 +870,16 @@ export default function ContaDetalhePage() {
                   href={viewerBlobUrl}
                   download="documento.pdf"
                   onClick={e => e.stopPropagation()}
-                  className="h-9 px-3 rounded-full bg-white/10 flex items-center gap-1.5 text-white text-xs font-medium active:scale-90 transition-transform"
+                  className="h-9 px-3 rounded-full bg-white/15 flex items-center gap-1.5 text-white text-xs font-medium active:scale-90 transition-transform"
                 >
                   <Download size={14} /> Baixar
                 </a>
               )}
               <button
                 onClick={closeViewer}
-                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform"
+                className="h-9 px-4 rounded-full bg-red-500/80 flex items-center justify-center gap-1.5 text-white text-xs font-semibold active:scale-90 transition-transform"
               >
-                <X size={18} />
+                <X size={16} /> Fechar
               </button>
             </div>
           </div>
