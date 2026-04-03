@@ -284,14 +284,9 @@ export default function ContaDetalhePage() {
           ? new Blob([blob], { type: 'application/pdf' })
           : blob;
 
-      if (detectedType === 'pdf') {
-        const pdfBytes = new Uint8Array(await finalBlob.arrayBuffer());
-        setViewerPdfData(pdfBytes);
-      } else {
-        const objectUrl = URL.createObjectURL(finalBlob);
-        viewerBlobRef.current = objectUrl;
-        setViewerBlobUrl(objectUrl);
-      }
+      const objectUrl = URL.createObjectURL(finalBlob);
+      viewerBlobRef.current = objectUrl;
+      setViewerBlobUrl(objectUrl);
     } catch (err) {
       console.error('Viewer error:', err);
       setViewerError(
