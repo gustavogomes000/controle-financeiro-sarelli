@@ -251,19 +251,20 @@ export default function ContaDetalhePage() {
       pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
       const arrayBuffer = await blob.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const images: string[] = [];
+      const scale = 1.5;
+
+      // Render pages progressively — show each as soon as ready
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
-        const scale = 2;
         const viewport = page.getViewport({ scale });
         const canvas = document.createElement('canvas');
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         const ctx = canvas.getContext('2d')!;
         await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
-        images.push(canvas.toDataURL('image/png'));
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setPdfPageImages(prev => [...prev, dataUrl]);
       }
-      setPdfPageImages(images);
     } catch (err) {
       console.error('PDF render error:', err);
       setViewerError('Não foi possível renderizar o PDF.');
